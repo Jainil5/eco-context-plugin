@@ -30,3 +30,9 @@ dist/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# LongMemEval (large)
+dataset/longmemeval_*.json
+!dataset/longmemeval_sample.json
+
+results/

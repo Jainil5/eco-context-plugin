@@ -1,0 +1,58 @@
+[
+  {
+    "file": "conversation_000_4d6b87c8.json",
+    "question_id": "4d6b87c8",
+    "question_type": "knowledge-update",
+    "question": "How many titles are currently on my to-watch list?",
+    "answer": "25"
+  },
+  {
+    "file": "conversation_001_852ce960.json",
+    "question_id": "852ce960",
+    "question_type": "knowledge-update",
+    "question": "What was the amount I was pre-approved for when I got my mortgage from Wells Fargo?",
+    "answer": "$400,000"
+  },
+  {
+    "file": "conversation_002_1cea1afa.json",
+    "question_id": "1cea1afa",
+    "question_type": "knowledge-update",
+    "question": "How many Instagram followers do I currently have?",
+    "answer": "600"
+  },
+  {
+    "file": "conversation_003_18bc8abd.json",
+    "question_id": "18bc8abd",
+    "question_type": "knowledge-update",
+    "question": "What brand of BBQ sauce am I currently obsessed with?",
+    "answer": "Kansas City Masterpiece"
+  },
+  {
+    "file": "conversation_004_01493427.json",
+    "question_id": "01493427",
+    "question_type": "knowledge-update",
+    "question": "How many new postcards have I added to my collection since I started collecting again?",
+    "answer": "25"
+  },
+  {
+    "file": "conversation_005_f9e8c073.json",
+    "question_id": "f9e8c073",
+    "question_type": "knowledge-update",
+    "question": "How many sessions of the bereavement support group did I attend?",
+    "answer": "five"
+  },
+  {
+    "file": "conversation_006_031748ae.json",
+    "question_id": "031748ae",
+    "question_type": "knowledge-update",
+    "question": "How many engineers do I lead when I just started my new role as Senior Software Engineer? How many engineers do I lead now?",
+    "answer": "When you just started your new role as Senior Software Engineer, you led 4 engineers. Now, you lead 5 engineers"
+  },
+  {
+    "file": "conversation_007_0977f2af.json",
+    "question_id": "0977f2af",
+    "question_type": "knowledge-update",
+    "question": "What new kitchen gadget did I invest in before getting the Air Fryer?",
+    "answer": "Instant Pot"
+  }
+]
