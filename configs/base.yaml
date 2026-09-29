@@ -1,0 +1,35 @@
+# Base config. Experiment configs use `extends: base.yaml` and override fields.
+# CLI overrides: scripts/... key.sub=value
+
+seed: 13
+
+data:
+  longmemeval_s: dataset/longmemeval_s_cleaned.json   # xiaowu0162/longmemeval-cleaned (HF)
+  dev_size: 100          # stratified by question_type, frozen before any tuning (M1)
+  split_file: configs/splits/longmemeval_s_split.json
+
+tokenizer: o200k_base    # the one tokenizer used to enforce every budget
+budgets: [500, 1000, 2000, 4000, 8000]
+
+models:
+  # Chat models / embeddings come from the root model.py (LLM, EMBEDDINGS, optional
+  # READER_LLM / JUDGE_LLM / EXTRACTION_LLM). These names are only for pricing lookups
+  # and cost-guard estimates; the wrapper logs the actual model name of each call.
+  reader: gpt-4o-mini
+  judge: gpt-4o          # LongMemEval's official judge model
+  extraction: gpt-4o-mini
+  embeddings: nomic-embed-text
+  temperature: 0
+
+# USD per 1M tokens. With a max_usd set, unknown models make the cost guard refuse to run (fail safe).
+# VERIFY against current provider pricing before M2.
+pricing:
+  gpt-4o-mini: {input_per_1m: 0.15, output_per_1m: 0.60}
+  gpt-4o: {input_per_1m: 2.50, output_per_1m: 10.00}
+  nomic-embed-text: {input_per_1m: 0.0}
+
+max_usd: null            # per run; null = no limit (estimate still printed). Set a number to make the guard stop above it.
+
+paths:
+  cache: .cache/llm_cache.sqlite
+  results: results/runs

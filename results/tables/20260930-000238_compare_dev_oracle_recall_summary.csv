@@ -1,0 +1,9 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+bm25,bm25_turns,250,ALL,94,,,,0.6041,0.5257,0.6865,0.6041,0.5257,0.6865,223.7,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+recent,recent_window,250,ALL,94,,,,0.0887,0.0426,0.1436,0.0887,0.0426,0.1436,224.3,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+bm25,bm25_turns,500,ALL,94,,,,0.7179,0.6374,0.7943,0.7179,0.6374,0.7943,463.0,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+recent,recent_window,500,ALL,94,,,,0.2264,0.1576,0.2968,0.2264,0.1576,0.2968,463.5,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+bm25,bm25_turns,1000,ALL,94,,,,0.795,0.7257,0.8599,0.795,0.7257,0.8599,956.4,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+recent,recent_window,1000,ALL,94,,,,0.2973,0.2234,0.3777,0.2973,0.2234,0.3777,957.6,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+bm25,bm25_turns,2000,ALL,94,,,,0.8938,0.8441,0.9379,0.8938,0.8441,0.9379,1913.9,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall
+recent,recent_window,2000,ALL,94,,,,0.5117,0.4278,0.5993,0.5117,0.4278,0.5993,1893.8,5751.3,0,0,0,20260930-000238_compare_dev_oracle_recall

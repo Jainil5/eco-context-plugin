@@ -1,32 +1,55 @@
-# Virtual environment
-venv/
-.venv/
-env/
-
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
-
-# Environment variables
-.env
-.env.*
-
-# IDE
-.vscode/
-.idea/
-
-# macOS
-.DS_Store
-
-# Logs
-*.log
-
-# Build artifacts
+*.egg-info/
 build/
 dist/
-*.egg-info/
 
-# Testing
+# Environments
+.venv/
+venv/
+env/
+
+# Secrets (see .env.example)
+.env
+.env.*
+!.env.example
+
+# Data, caches, raw runs (traces embed LongMemEval text; tables in results/tables/ are committed)
+dataset/
+.cache/
+results/runs/
+demo/results/runs/
+demo/dataset
+demo/.cache
+
+# Tooling / local state
 .pytest_cache/
 .coverage
 htmlcov/
+.gnhf/
+.claude/settings.local.json
+.qoder/
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Docs, notes and agent files stay local; the repo ships implementation + README only
+*.md
+!README.md
+docs/
+demo/
+
+# Legacy POC code at the root (superseded by core/ + systems/; kept in demo/). Delete locally when ready.
+eco/
+configs/poc.yaml
+scripts/run_poc.py
+scripts/export_v1_results.py
+scripts/compare_papers.py
+scripts/recall_preview.py
+scripts/make_tables.py
+scripts/eco_report.py
+scripts/probe_judges.py
+results/tables/comparison.csv
+results/tables/v1_results*.csv

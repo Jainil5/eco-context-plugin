@@ -1,0 +1,28 @@
+extends: base.yaml
+
+# Context-optimization comparison. Override any field on the CLI, e.g.
+#   python scripts/run_compare.py compare.eval=qa "compare.systems=[bm25,eco,memorycpt]"
+compare:
+  split: dev               # dev (fit / iterate) | test (final report only, never tune on it)
+  n_questions: null        # null = whole split; else a stratified sample of it (sample_seed)
+  sample_seed: 7
+  view: oracle             # oracle = evidence sessions only | full = whole ~115K-token haystack
+  eval: recall             # recall = evidence recall only, no reader/judge | qa = shared reader + judge
+  include_abstention: false  # abstention questions have no evidence turns to recall
+  systems: [recent, bm25, dense, hybrid, mmr, eco, oracle]
+  workers: 8
+  pool_models: null        # e.g. [openai/gpt-oss-20b] to pin one provider from model.py LLM_POOL
+
+budgets: [250, 500, 1000, 2000]
+construction_parallel: 4   # parallel extraction calls inside one memory build (eco_facts, memorycpt)
+
+models:                    # names for cost estimates only; actual models come from model.py
+  reader: gpt-oss-20b
+  judge: openai/gpt-oss-20b (NVIDIA)
+  extraction: gpt-oss-20b
+  embeddings: nomic-embed-text
+
+reader_max_tokens: 4096
+# Official LongMemEval judge uses max_tokens=10; gpt-oss reasons first and can return an empty reply at 10.
+# Raised and recorded as a deviation; verdict parsing unchanged ('yes' in reply).
+judge_max_tokens: 1024
