@@ -38,11 +38,11 @@ htmlcov/
 # Docs, notes and agent files stay local; the repo ships implementation + README only
 *.md
 !README.md
-docs/
-demo/
+/docs/
+/demo/
 
 # Legacy POC code at the root (superseded by core/ + systems/; kept in demo/). Delete locally when ready.
-eco/
+/eco/
 configs/poc.yaml
 scripts/run_poc.py
 scripts/export_v1_results.py

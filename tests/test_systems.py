@@ -58,12 +58,7 @@ def test_llm_free_systems_respect_budget_and_provenance(services, name, budget):
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
-@pytest.mark.parametrize("name", [
-    "hybrid", "mmr", "oracle",
-    pytest.param("eco", marks=pytest.mark.xfail(strict=True, reason=(
-        "known weakness: cost-benefit greedy prefers the cheapest generic turn ('cute') when only one turn "
-        "fits, because facility location rewards covering others, not the item's own relevance"))),
-])
+@pytest.mark.parametrize("name", ["hybrid", "mmr", "oracle", "eco"])
 def test_one_turn_budget_picks_the_evidence(services, name):
     q = make_q()
     s = build_system(name, services)
@@ -117,3 +112,13 @@ def test_tables_built_from_run(tmp_path):
     assert all(r["qtype"] == "ALL" and r["accuracy"] == "" for r in rows)
     assert float(next(r for r in rows if r["system"] == "bm25" and r["budget"] == "1000")["verbatim_recall"]) == 1.0
     assert len(list(csv.DictReader(open(full)))) == 8  # ALL + one qtype, per system x budget
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_untuned_eco_prefers_generic_turn_at_one_turn_budget(services):
+    """Regression record: with flat RRF relevance and raw cosine, ECO picked a short generic turn ('cute')."""
+    from systems.eco.method import ECO
+    q = make_q()
+    s = ECO(services, rel_tau=None, sim_floor=0.0)
+    r = s.build_context(q.question, s.build_memory(q), 40, q.question_date)
+    assert r.verbatim_turn_ids == ["s2:1"]

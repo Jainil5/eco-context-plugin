@@ -17,13 +17,21 @@ maximize   F(S) = sum over candidates i of  r(i) * max over m in S of  sim(i, m)
 subject to sum over m in S of cost(m) <= B
 ```
 
-- `r(i)`: relevance of turn i to the question (BM25 and dense rankings fused with RRF)
-- `sim(i, m)`: embedding similarity, i.e. how well chosen turn m stands in for turn i
+- `r(i)`: relevance of turn i to the question: rank in the fused BM25 + dense (RRF) ranking, decayed as
+  `exp(-(rank - 1) / tau)`
+- `sim(i, m)`: how well chosen turn m stands in for turn i: embedding cosine, rescaled so that anything at or below a
+  floor counts as no coverage
 - `fid(m)`: fidelity of the rendering (1.0 for a raw turn, lower for a compressed fact)
 - `cost(m)`: tokens
 
 F is monotone submodular, so a lazy cost-benefit greedy (CELF) plus a best-single-item check gives a
 constant-factor approximation guarantee.
+
+The two shaping parameters matter. With the raw RRF score, relevance is nearly flat (the 40th-ranked turn still
+weighs about 0.6 of the top one) and turns from the same chat all look similar, so the optimizer summarizes the whole
+conversation instead of answering the question. That made ECO the weakest selector at small budgets. Both values,
+`tau = 2` and `floor = 0.7`, were chosen on the dev split only (`scripts/sweep_eco.py`, rule fixed in advance: best
+mean recall over the four budgets) and frozen before the test split was run.
 
 ## The flow
 
@@ -44,7 +52,54 @@ How the compared systems spend their effort:
 | Query time | one optimization, no LLM | ReAct agent searches and takes notes | retrieval + LLM query-aware summary |
 | Reader sees | raw turns chosen for coverage | collected notes, cut to B | summary (<= 512 tokens) |
 
-## Results (pilot)
+## Results
+
+### Evidence kept under a budget (test split)
+
+<!-- recall:start -->
+Test split, run once after ECO's settings were frozen on dev: 376 answerable questions, oracle view. Metric: share of gold evidence turns whose raw text reaches the reader (verbatim recall), with 95% bootstrap CIs. Source: `results/tables/20260930-080234_compare_test_oracle_recall_summary.csv`.
+
+| System | B=250 | B=500 | B=1000 | B=2000 |
+|---|---|---|---|---|
+| **ECO (ours)** | 0.602 (0.56-0.64) | **0.809** (0.77-0.84) | **0.905** (0.88-0.93) | **0.954** (0.94-0.97) |
+| Hybrid (BM25 + dense) | **0.632** (0.59-0.67) | 0.730 (0.69-0.77) | 0.832 (0.80-0.86) | 0.901 (0.88-0.92) |
+| BM25 | 0.607 (0.56-0.65) | 0.729 (0.69-0.76) | 0.811 (0.78-0.84) | 0.873 (0.84-0.90) |
+| MMR | 0.592 (0.55-0.63) | 0.727 (0.69-0.76) | 0.822 (0.79-0.85) | 0.892 (0.87-0.92) |
+| Dense | 0.548 (0.51-0.59) | 0.673 (0.63-0.71) | 0.780 (0.75-0.81) | 0.860 (0.83-0.89) |
+| Most recent | 0.102 (0.08-0.13) | 0.229 (0.19-0.27) | 0.357 (0.32-0.40) | 0.513 (0.47-0.55) |
+| Oracle (upper bound) | 0.877 (0.85-0.90) | 0.977 (0.96-0.99) | 1.000 (1.00-1.00) | 1.000 (1.00-1.00) |
+
+ECO minus the strongest baseline at each budget, paired over the same questions (95% paired bootstrap CI). Source: `results/tables/20260930-080234_compare_test_oracle_recall_paired_eco.csv`.
+
+| Budget | Strongest baseline | Difference | 95% CI | ECO better / worse (questions) |
+|---|---|---|---|---|
+| 250 | Hybrid (BM25 + dense) | -0.031 | [-0.061, -0.002] | 25 / 42 |
+| 500 | Hybrid (BM25 + dense) | +0.079 | [+0.045, +0.112] | 73 / 20 |
+| 1000 | Hybrid (BM25 + dense) | +0.073 | [+0.047, +0.098] | 65 / 11 |
+| 2000 | Hybrid (BM25 + dense) | +0.052 | [+0.035, +0.070] | 44 / 5 |
+
+ECO minus the strongest baseline by question type (verbatim recall).
+
+| Question type | n | B=250 | B=500 | B=1000 | B=2000 |
+|---|---|---|---|---|---|
+| knowledge-update | 57 | -0.132 | +0.088 | +0.026 | -0.009 |
+| multi-session | 97 | -0.019 | +0.107 | +0.151 | +0.079 |
+| single-session-assistant | 45 | -0.178 | -0.133 | -0.044 | +0.000 |
+| single-session-preference | 24 | -0.042 | +0.000 | +0.014 | +0.021 |
+| single-session-user | 51 | +0.000 | +0.039 | +0.000 | +0.000 |
+| temporal-reasoning | 102 | +0.001 | +0.110 | +0.096 | +0.100 |
+<!-- recall:end -->
+
+What this shows:
+- Once the budget fits a few turns (B >= 500), ECO keeps significantly more gold evidence than every retrieval
+  baseline, with the largest gains on multi-session and temporal-reasoning questions, where evidence is spread over
+  several turns.
+- At B = 250, ECO is on par with BM25 and MMR and slightly behind hybrid retrieval.
+- ECO is weakest on single-session-assistant questions, whose answer sits in one long assistant turn that the
+  cost-per-token objective tends to skip.
+- This measures what reaches the reader, not answer accuracy; it makes no LLM calls.
+
+### QA accuracy vs ReFind and MemoryCPT (pilot, before ECO tuning)
 
 <!-- results:start -->
 QA accuracy on 12 stratified dev questions, oracle view, reader and judge `gpt-oss-20b` (95% bootstrap CI). Source: `results/tables/20260930-001519_compare_dev_oracle_qa_summary.csv`.
@@ -58,13 +113,9 @@ QA accuracy on 12 stratified dev questions, oracle view, reader and judge `gpt-o
 Reference, same run: the oracle (all gold evidence turns first) scores 8/12 at B=500, 8/12 at B=1000, so the reader caps accuracy on this sample. Token columns count LLM calls only (embeddings run locally and are listed separately in the CSV); judge calls are excluded.
 <!-- results:end -->
 
-What the pilot shows so far:
-- ECO matches or beats MemoryCPT-lite here while making no LLM calls at build or query time.
-- In recall-only runs, ECO keeps the most evidence at larger budgets but is the weakest selector at the smallest
-  budgets, where cost-benefit greedy favors short, generic turns. Fixing this is the next step.
-- ReFind (reimpl.) scores 0 because its search agent never saves notes with `gpt-oss-20b`; this is a failure of the
-  agent with this model, not evidence about the method.
-- Twelve questions is a pilot: the confidence intervals overlap. Full dev and test runs come next.
+Caveats: this 12-question pilot ran with the untuned ECO, and its confidence intervals overlap. ReFind (reimpl.)
+scores 0 because its search agent never saves notes with `gpt-oss-20b`; that is a failure of the agent with this
+model, not evidence about the method. A QA rerun with the tuned ECO and a stronger reader is next.
 
 ## Systems
 
@@ -135,7 +186,8 @@ model.py            model definitions (keys come from .env)
 configs/            base.yaml, compare.yaml, splits/
 core/               shared plumbing: data + views, llm client/cache/cost, retrieval, eval, runner
 systems/            one package per system: baselines/, eco/, refind/, memorycpt/
-scripts/            run_compare.py, make_table.py, readme_results.py, prepare_data.py, list_models.py
+scripts/            run_compare.py, make_table.py, paired_compare.py, sweep_eco.py, readme_results.py,
+                    prepare_data.py, list_models.py
 tests/              pytest suite (no network or paid LLM calls)
 results/tables/     generated CSVs
 ```

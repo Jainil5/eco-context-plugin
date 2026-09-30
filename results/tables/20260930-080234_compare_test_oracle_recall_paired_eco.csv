@@ -1,0 +1,17 @@
+system,baseline,budget,metric,n,mean_diff,ci_low,ci_high,better,worse,run_id
+eco,bm25,250,verbatim_recall,376,-0.0056,-0.0436,0.0326,61,67,20260930-080234_compare_test_oracle_recall
+eco,dense,250,verbatim_recall,376,0.054,0.0197,0.0895,71,33,20260930-080234_compare_test_oracle_recall
+eco,hybrid,250,verbatim_recall,376,-0.0308,-0.0609,-0.0015,25,42,20260930-080234_compare_test_oracle_recall
+eco,mmr,250,verbatim_recall,376,0.0098,-0.0256,0.0441,58,51,20260930-080234_compare_test_oracle_recall
+eco,bm25,500,verbatim_recall,376,0.0804,0.0461,0.1143,81,27,20260930-080234_compare_test_oracle_recall
+eco,dense,500,verbatim_recall,376,0.1359,0.0973,0.1733,111,23,20260930-080234_compare_test_oracle_recall
+eco,hybrid,500,verbatim_recall,376,0.0788,0.0454,0.1116,73,20,20260930-080234_compare_test_oracle_recall
+eco,mmr,500,verbatim_recall,376,0.0822,0.0478,0.1169,81,26,20260930-080234_compare_test_oracle_recall
+eco,bm25,1000,verbatim_recall,376,0.0936,0.0656,0.1228,78,15,20260930-080234_compare_test_oracle_recall
+eco,dense,1000,verbatim_recall,376,0.1247,0.0935,0.1554,98,13,20260930-080234_compare_test_oracle_recall
+eco,hybrid,1000,verbatim_recall,376,0.0729,0.0474,0.0984,65,11,20260930-080234_compare_test_oracle_recall
+eco,mmr,1000,verbatim_recall,376,0.083,0.0574,0.1088,70,10,20260930-080234_compare_test_oracle_recall
+eco,bm25,2000,verbatim_recall,376,0.0802,0.0573,0.1046,61,7,20260930-080234_compare_test_oracle_recall
+eco,dense,2000,verbatim_recall,376,0.0934,0.0703,0.1183,75,6,20260930-080234_compare_test_oracle_recall
+eco,hybrid,2000,verbatim_recall,376,0.0523,0.0345,0.0704,44,5,20260930-080234_compare_test_oracle_recall
+eco,mmr,2000,verbatim_recall,376,0.062,0.0418,0.0833,49,6,20260930-080234_compare_test_oracle_recall
