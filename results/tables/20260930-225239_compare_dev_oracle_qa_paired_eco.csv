@@ -1,0 +1,13 @@
+system,baseline,budget,metric,n,mean_diff,ci_low,ci_high,better,worse,run_id
+eco,bm25,250,correct,94,-0.1596,-0.2553,-0.0638,4,19,20260930-225239_compare_dev_oracle_qa
+eco,hybrid,250,correct,94,-0.0638,-0.1277,0.0,2,8,20260930-225239_compare_dev_oracle_qa
+eco,memorycpt,250,correct,94,-0.2979,-0.4043,-0.1915,4,32,20260930-225239_compare_dev_oracle_qa
+eco,mmr,250,correct,94,-0.0745,-0.1596,0.0106,5,12,20260930-225239_compare_dev_oracle_qa
+eco,bm25,500,correct,94,-0.0106,-0.0851,0.0638,7,8,20260930-225239_compare_dev_oracle_qa
+eco,hybrid,500,correct,94,0.0426,-0.0426,0.1277,10,6,20260930-225239_compare_dev_oracle_qa
+eco,memorycpt,500,correct,94,-0.0106,-0.1064,0.0851,10,11,20260930-225239_compare_dev_oracle_qa
+eco,mmr,500,correct,94,0.0319,-0.0532,0.1064,9,6,20260930-225239_compare_dev_oracle_qa
+eco,bm25,1000,correct,94,0.0532,-0.0213,0.1277,9,4,20260930-225239_compare_dev_oracle_qa
+eco,hybrid,1000,correct,94,0.1064,0.0213,0.1915,14,4,20260930-225239_compare_dev_oracle_qa
+eco,memorycpt,1000,correct,94,-0.0106,-0.0957,0.0745,9,10,20260930-225239_compare_dev_oracle_qa
+eco,mmr,1000,correct,94,0.0532,0.0,0.1064,6,1,20260930-225239_compare_dev_oracle_qa
