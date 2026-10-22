@@ -10,7 +10,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core.config import REPO_ROOT  # noqa: E402
 
-SYSTEMS = [("eco", "ECO (ours)"), ("memorycpt", "MemoryCPT-lite (reimpl.)"), ("refind", "ReFind (reimpl.)")]
+SYSTEMS = [("eco_spans", "**ECO (ours)**"), ("refind", "ReFind (reimpl.)"),
+           ("memorycpt", "MemoryCPT-lite (reimpl.)"), ("bm25", "BM25 (turns)"),
+           ("hybrid", "Hybrid BM25+dense (turns)"), ("mmr", "MMR (turns)"),
+           ("span_hybrid", "Hybrid BM25+dense (sentences)"), ("span_mmr", "MMR (sentences)"),
+           ("oracle", "Oracle (upper bound)")]
 START, END = "<!-- results:start -->", "<!-- results:end -->"
 
 tables = REPO_ROOT / "results" / "tables"
@@ -26,8 +30,11 @@ def acc(r):
     return f"{k}/{n} ({float(r['accuracy_ci_low']):.2f}-{float(r['accuracy_ci_high']):.2f})"
 
 
-lines = [f"QA accuracy on {n} stratified dev questions, oracle view, reader and judge `gpt-oss-20b` "
-         f"(95% bootstrap CI). Source: `results/tables/{src.name}`.", "",
+run_id = rows[0]["run_id"]                      # e.g. 20261022-120500_compare_dev_oracle_qa
+_, split, view, mode = run_id.replace("_compare", "").split("_", 3)[:4]
+lines = [f"QA accuracy: {n} stratified {split} questions, `{view}` view, one shared reader and judge "
+         f"(`gpt-oss-20b`), one token budget set in `configs/compare.yaml` (95% bootstrap CI). "
+         f"Source: `results/tables/{src.name}`. Every row is a whole system, end to end.", "",
          "| System | " + " | ".join(f"Accuracy, B={b}" for b in budgets)
          + " | Reader context tokens (B=" + str(budgets[-1]) + ") | LLM build tokens / question | LLM query-time tokens / query |",
          "|---|" + "---|" * (len(budgets) + 3)]
@@ -39,11 +46,9 @@ for key, label in SYSTEMS:
     lines.append(f"| {label} | " + " | ".join(acc(by[(key, b)]) for b in budgets)
                  + f" | {float(last['avg_context_tokens']):.0f} | {int(last['llm_build_tokens_per_q']):,}"
                  f" | {int(last['llm_query_tokens_per_query']):,} |")
-if ("oracle", budgets[-1]) in by:
-    lines += ["", "Reference, same run: the oracle (all gold evidence turns first) scores "
-              + ", ".join(f"{acc(by[('oracle', b)]).split(' ')[0]} at B={b}" for b in budgets)
-              + ", so the reader caps accuracy on this sample. Token columns count LLM calls only (embeddings "
-              "run locally and are listed separately in the CSV); judge calls are excluded."]
+lines += ["", "Token columns count chat-model calls only (embeddings run locally and are listed separately in the "
+          "CSV); judge calls are excluded from system cost. The oracle row is the ceiling this sample allows: the "
+          "reader cannot answer questions whose evidence it would get wrong even with the gold sessions first."]
 
 readme = REPO_ROOT / "README.md"
 text = readme.read_text()
