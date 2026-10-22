@@ -21,6 +21,10 @@ models:
   embeddings: nomic-embed-text
   temperature: 0
 
+# Params applied to every chat call, and folded into the cache key. Some hosted models need one to answer at all
+# (gpt-oss behind NIM burns its whole budget on reasoning by default and returns an empty completion).
+llm_call_params: {}
+
 # USD per 1M tokens. With a max_usd set, unknown models make the cost guard refuse to run (fail safe).
 # VERIFY against current provider pricing before M2.
 pricing:

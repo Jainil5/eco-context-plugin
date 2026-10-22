@@ -28,6 +28,15 @@ class FakeEmbeddings:
 
 
 @pytest.fixture
+def no_sleep(monkeypatch):
+    """The client sleeps between transient retries; tests must not pay for that."""
+    import core.llm.client as cm
+    slept = []
+    monkeypatch.setattr(cm.time, "sleep", lambda s: slept.append(s))
+    return slept
+
+
+@pytest.fixture
 def cache(tmp_path):
     c = DiskCache(tmp_path / "cache.sqlite")
     yield c

@@ -16,7 +16,7 @@ from core.context import Services
 from core.data.longmemeval import Question
 from core.eval.judge import judge
 from core.eval.reader import read
-from core.eval.recall import evidence_recall
+from core.eval.recall import answer_in_context, content_recall, evidence_recall
 from core.llm.cache import DiskCache
 from core.llm.client import EmbeddingClient, LLMClient
 from core.llm.cost import CostLogger, Pricing
@@ -36,13 +36,25 @@ class Runner:
         self.cache = DiskCache(cfg["paths"]["cache"])
         self.logger = CostLogger(run_dir / "costs.jsonl", Pricing(cfg.get("pricing", {})))
         self.judge_model, self.embeddings = judge_model, embeddings
+        # params every chat call in this run carries (e.g. reasoning_effort); they also enter the cache key
+        self.llm_defaults = dict(cfg.get("llm_call_params") or {})
         self._lock = threading.Lock()
+        self._qid_locks: dict[str, threading.Lock] = {}
+
+    def qid_lock(self, qid: str) -> threading.Lock:
+        """One lock per question: every system building memory for the same haystack embeds the same texts,
+        and concurrent first-timers all miss the embedding cache at once and pay for the same work N times."""
+        with self._lock:
+            if qid not in self._qid_locks:
+                self._qid_locks[qid] = threading.Lock()
+            return self._qid_locks[qid]
 
     def chat_for(self, qid: str):
         return self.pool[int(hashlib.md5(qid.encode()).hexdigest(), 16) % len(self.pool)]
 
     def services(self, system: str, chat_model) -> Services:
-        chat = LLMClient(chat_model, self.cache, self.logger, method=system) if chat_model is not None else None
+        d = self.llm_defaults
+        chat = LLMClient(chat_model, self.cache, self.logger, method=system, defaults=d) if chat_model is not None else None
         emb = EmbeddingClient(self.embeddings, self.cache, self.logger, method=system) if self.embeddings else None
         return Services(llms={"extraction": chat, "query": chat} if chat else {}, embedder=emb)
 
@@ -55,8 +67,11 @@ class Runner:
         method = build_system(system, self.services(system, chat_model), self.cfg.get("construction_parallel", 4))
         tok = get_tokenizer()
         t0 = time.perf_counter()
-        memory = method.build_memory(q)
+        with self.qid_lock(q.qid):  # index/embed the shared haystack once, not once per system
+            memory = method.build_memory(q)
         t_build = time.perf_counter() - t0
+        gold = set(q.evidence_turn_ids)
+        gold_texts = [t.text for t in q.haystack if t.turn_id in gold]
         rows = []
         for b in budgets:
             t1 = time.perf_counter()
@@ -68,10 +83,13 @@ class Runner:
                    "view_turns": len(q.haystack), "n_tokens": res.n_tokens,
                    "evidence_recall": evidence_recall(res.source_turn_ids, q.evidence_turn_ids),
                    "verbatim_recall": evidence_recall(res.verbatim_turn_ids, q.evidence_turn_ids),
+                   "content_recall": content_recall(res.context, gold_texts),
+                   "answer_in_ctx": answer_in_context(res.context, q.answer),
                    "latency_build_s": t_build, "latency_context_s": t_ctx}
             if self.eval_mode == "qa":
-                reader = LLMClient(chat_model, self.cache, self.logger, method=system)
-                judge_c = LLMClient(self.judge_model, self.cache, self.logger, method=system)
+                reader = LLMClient(chat_model, self.cache, self.logger, method=system, defaults=self.llm_defaults)
+                judge_c = LLMClient(self.judge_model, self.cache, self.logger, method=system,
+                                    defaults=self.llm_defaults)
                 hyp = read(reader, q.question, res.context, q.question_date, qid=q.qid,
                            max_tokens=self.cfg.get("reader_max_tokens", 1024))
                 ok, verdict = judge(judge_c, q, hyp, max_tokens=self.cfg.get("judge_max_tokens", 10))
@@ -88,7 +106,9 @@ class Runner:
 
     def run(self, questions: list[Question], systems: list[str], budgets: list[int], workers: int = 4,
             progress=print) -> None:
-        jobs = sorted(((q, s) for q in questions for s in systems), key=lambda j: SLOW_FIRST.get(j[1], 2))
+        # system-major, so the jobs in flight at any moment are mostly *different* questions: with a per-question
+        # build lock, a question-major queue would park every worker on one haystack while its systems line up.
+        jobs = sorted(((q, s) for s in systems for q in questions), key=lambda j: SLOW_FIRST.get(j[1], 2))
         done = 0
         with ThreadPoolExecutor(max_workers=workers) as ex:
             futs = {ex.submit(self.run_one, q, s, budgets): (q.qid, s) for q, s in jobs}

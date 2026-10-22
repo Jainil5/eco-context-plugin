@@ -9,11 +9,18 @@ compare:
   view: oracle             # oracle = evidence sessions only | full = whole ~115K-token haystack
   eval: recall             # recall = evidence recall only, no reader/judge | qa = shared reader + judge
   include_abstention: false  # abstention questions have no evidence turns to recall
-  systems: [recent, bm25, dense, hybrid, mmr, eco, oracle]
+  # The default comparison is the WHOLE SYSTEM against the whole controls, one row each: `eco_spans` is ECO as
+  # built here (sentence-unit budgeted facility location), against retrieval at the same unit (span_hybrid,
+  # span_mmr) and at turn unit (bm25, hybrid, mmr, eco). The objective mechanisms are not separate systems - they
+  # are ablations of one component and live in configs/ablations.yaml.
+  # Pre-registered win rule, written before those runs: an ECO variant counts as better than retrieval only if its
+  # paired answer_in_ctx beats BOTH span_hybrid and span_mmr at B=250 and B=500 with the 95% paired bootstrap CI
+  # excluding zero. Anything less is reported as "no measurable difference", not as a win.
+  systems: [eco_spans, span_hybrid, span_mmr, eco, bm25, hybrid, mmr]
   workers: 8
   pool_models: null        # e.g. [openai/gpt-oss-20b] to pin one provider from model.py LLM_POOL
 
-budgets: [250, 500, 1000, 2000]
+budgets: [250, 500, 1000]
 construction_parallel: 4   # parallel extraction calls inside one memory build (eco_facts, memorycpt)
 
 models:                    # names for cost estimates only; actual models come from model.py
@@ -26,3 +33,8 @@ reader_max_tokens: 4096
 # Official LongMemEval judge uses max_tokens=10; gpt-oss reasons first and can return an empty reply at 10.
 # Raised and recorded as a deviation; verdict parsing unchanged ('yes' in reply).
 judge_max_tokens: 1024
+# Deviation recorded for the same reason, one level down: openai/gpt-oss-20b through the NVIDIA NIM route answers
+# with default reasoning effort by returning HTTP 200 + an empty completion carrying
+# response_metadata.error ('unexpected tokens remaining in message header'). The wrapper now raises on that
+# instead of caching a silent zero (core/llm/client.py). Low effort is what makes the same calls answer properly.
+llm_call_params: {reasoning_effort: low}

@@ -66,19 +66,53 @@ def _with_params(chat_model, params: dict):
     return chat_model.bind(**params) if params else chat_model
 
 
+class ProviderError(RuntimeError):
+    """HTTP 200 whose message carries a provider error in `response_metadata` and empty content. NIM does this;
+    LangChain does not raise on it. Silent here means a silently zero-scored run, so it must be fatal."""
+
+
+class EmptyResponseError(RuntimeError):
+    """A completion with no text at all. Usually a reasoning model that spent the whole budget thinking;
+    another attempt with a fresh budget can succeed, so it counts as transient."""
+
+
+def _message_text(msg) -> str:
+    return msg.content if isinstance(msg.content, str) else str(msg.content)
+
+
+def _unwrap(msg) -> str:
+    """Turn an AIMessage into text, raising if the endpoint actually reported a failure or said nothing."""
+    md = getattr(msg, "response_metadata", None)
+    err = md.get("error") if isinstance(md, dict) else None
+    if err is not None:
+        raise ProviderError(f"provider error in response metadata: {err}")
+    text = _message_text(msg)
+    if not text.strip():
+        finish = (md or {}).get("finish_reason") if isinstance(md, dict) else None
+        raise EmptyResponseError(f"empty completion (finish_reason={finish!r})")
+    return text
+
+
 def _transient(e: Exception) -> bool:
     name = type(e).__name__.lower()
     msg = str(e).lower()
-    return any(s in name for s in ("timeout", "connection", "ratelimit")) or \
+    return isinstance(e, EmptyResponseError) or \
+        any(s in name for s in ("timeout", "connection", "ratelimit")) or \
         any(s in msg for s in ("429", "500", "502", "503", "504", "timed out", "too many requests"))
 
 
 def _invoke_with_retry(model, messages, retries: int):
-    """Retry transient failures (timeouts, 429, 5xx) with exponential backoff. Latency = successful attempt."""
+    """Retry transient failures (timeouts, 429, 5xx, empty replies) with exponential backoff. The reply is unwrapped
+    inside the loop, because '200 with nothing in it' is the failure mode that used to pass as a success.
+    ProviderError is a request-shape problem the same request will hit again, so it is not retried.
+    Returns (msg, text, latency) with latency = successful attempt."""
     for attempt in range(retries + 1):
         t0 = time.perf_counter()
         try:
-            return model.invoke(messages), time.perf_counter() - t0
+            msg = model.invoke(messages)
+            return msg, _unwrap(msg), time.perf_counter() - t0
+        except ProviderError:
+            raise
         except Exception as e:  # noqa: BLE001 - provider SDKs raise many types
             if attempt == retries or not _transient(e):
                 raise
@@ -87,27 +121,34 @@ def _invoke_with_retry(model, messages, retries: int):
 
 class LLMClient:
     def __init__(self, chat_model: Any, cache: DiskCache, logger: CostLogger, method: str | None = None,
-                 retries: int = 4):
+                 retries: int = 4, defaults: dict | None = None):
+        """`defaults`: params applied to every call from this client (and folded into the cache key), e.g.
+        `{"reasoning_effort": "low"}` for gpt-oss behind NIM, which otherwise empties its budget on thinking."""
         self.retries = retries
         self.chat_model = chat_model
         self.cache = cache
         self.logger = logger
         self.method = method
+        self.defaults = dict(defaults or {})
         self.model = model_id(chat_model)
 
     def complete(self, messages: list[dict] | str, stage: str, qid: str | None = None, **params) -> LLMResponse:
         if isinstance(messages, str):
             messages = [{"role": "user", "content": messages}]
-        all_params = {**model_params(self.chat_model), **params}
+        call_params = {**self.defaults, **params}
+        all_params = {**model_params(self.chat_model), **call_params}
         key = make_key("chat", self.model, messages, all_params)
 
         hit = self.cache.get(key)
+        # a blank reply cached before this check existed (or by an older param set) is a miss, so the entry heals
+        if hit is not None and not str(hit.get("text", "")).strip():
+            hit = None
         if hit is not None:
             resp = LLMResponse(**{**hit, "cached": True})
         else:
-            model = _with_params(self.chat_model, params)
-            msg, latency = _invoke_with_retry(model, [(m["role"], m["content"]) for m in messages], self.retries)
-            text = msg.content if isinstance(msg.content, str) else str(msg.content)
+            model = _with_params(self.chat_model, call_params)
+            msg, text, latency = _invoke_with_retry(model, [(m["role"], m["content"]) for m in messages],
+                                                    self.retries)
             usage = getattr(msg, "usage_metadata", None) or {}
             tok = get_tokenizer()
             n_in = usage.get("input_tokens") or sum(tok.count(m["content"]) for m in messages)

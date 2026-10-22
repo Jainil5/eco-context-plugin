@@ -1,9 +1,10 @@
 import json
 
 import pytest
+from langchain_core.messages import AIMessage
 
 from core.llm.cache import DiskCache, make_key
-from core.llm.client import EmbeddingClient, LLMClient
+from core.llm.client import EmbeddingClient, EmptyResponseError, LLMClient, ProviderError, model_params
 from core.llm.cost import CostLogger, Pricing
 
 
@@ -114,3 +115,73 @@ def test_transient_errors_retried(cache, logger, monkeypatch):
     with pytest.raises(ValueError):
         LLMClient(b, cache, logger).complete("y", stage="reader")
     assert b.n == 1  # non-transient errors are not retried
+
+
+class ScriptedReply:
+    """Minimal chat stub whose reply is exactly the AIMessage we want to test the unwrapping against."""
+    model_name, temperature = "fake-chat", 0.0
+
+    def __init__(self, msgs):
+        self.msgs, self.calls, self.bound = list(msgs), 0, []
+
+    def bind(self, **kw):
+        self.bound.append(kw)
+        return self
+
+    def invoke(self, msgs):
+        self.calls += 1
+        return self.msgs[min(self.calls, len(self.msgs)) - 1]
+
+
+# what the NVIDIA NIM route actually returns for an openai/gpt-oss-20b request with default reasoning effort
+NIM_ERROR_MSG = AIMessage(content="", response_metadata={
+    "error": {"message": "unexpected tokens remaining in message header: Some(\"to=assistant\")",
+              "type": "BadRequestError", "code": 400},
+    "finish_reason": "stop"})
+
+
+def test_provider_error_hidden_in_metadata_is_fatal(cache, logger, no_sleep):
+    """200 + empty content + an error dict in the metadata used to be cached as a successful empty reply, which is
+    how a whole system ended up scoring 0. It must raise, retry nothing, and cache nothing."""
+    m = ScriptedReply([NIM_ERROR_MSG])
+    with pytest.raises(ProviderError, match="unexpected tokens remaining"):
+        LLMClient(m, cache, logger).complete("x", stage="reader")
+    assert m.calls == 1 and no_sleep == [] and len(cache) == 0
+
+
+def test_empty_completion_is_retried_then_raised(cache, logger, no_sleep):
+    m = ScriptedReply([AIMessage("")] * 3)
+    with pytest.raises(EmptyResponseError):
+        LLMClient(m, cache, logger, retries=2).complete("x", stage="reader")
+    assert m.calls == 3 and len(no_sleep) == 2 and len(cache) == 0
+
+
+def test_empty_completion_that_recovers_is_cached(cache, logger, no_sleep):
+    m = ScriptedReply([AIMessage(""), AIMessage("recovered")])
+    assert LLMClient(m, cache, logger).complete("x", stage="reader").text == "recovered"
+    assert m.calls == 2 and len(cache) == 1
+
+
+def test_defaults_reach_the_call_and_the_cache_key(chat, cache, logger):
+    """`defaults` are what make hosted reasoning models usable; they must apply to every call and must not let a
+    differently-parametered entry be served from cache."""
+    m = ScriptedReply([AIMessage("ok")])
+    LLMClient(m, cache, logger, defaults={"reasoning_effort": "low"}).complete("x", stage="reader", max_tokens=4096)
+    assert m.bound == [{"reasoning_effort": "low", "max_tokens": 4096}], "call params win over defaults"
+    plain = ScriptedReply([AIMessage("ok2")])
+    LLMClient(plain, cache, logger).complete("x", stage="reader", max_tokens=4096)
+    assert plain.calls == 1, "a different param set is a different cache entry"
+    again = ScriptedReply([AIMessage("ok3")])
+    assert LLMClient(again, cache, logger, defaults={"reasoning_effort": "low"}).complete(
+        "x", stage="reader", max_tokens=4096).cached
+    assert again.calls == 0
+
+
+def test_cached_blank_reply_is_refreshed(chat, cache, logger):
+    """Poisoned entries written before this check existed must heal on the next run, not be served forever."""
+    msgs = [{"role": "user", "content": "x"}]
+    key = make_key("chat", "fake-chat", msgs, model_params(chat))
+    cache.set(key, {"text": "  ", "input_tokens": 5, "output_tokens": 0, "latency_s": 0.1, "model": "fake-chat"})
+    r = LLMClient(chat, cache, logger).complete("x", stage="reader")
+    assert r.text == "answer one" and chat.calls == 1 and not r.cached
+    assert cache.get(key)["text"] == "answer one"
