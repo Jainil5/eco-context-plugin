@@ -1,0 +1,8 @@
+system,baseline,budget,metric,n,mean_diff,ci_low,ci_high,better,worse,run_id
+eco_spans,bm25,500,correct,12,0.0833,0.0,0.25,1,0,20261022-133443_compare_dev_oracle_qa
+eco_spans,hybrid,500,correct,12,0.0833,0.0,0.25,1,0,20261022-133443_compare_dev_oracle_qa
+eco_spans,memorycpt,500,correct,12,-0.0833,-0.25,0.0,0,1,20261022-133443_compare_dev_oracle_qa
+eco_spans,mmr,500,correct,12,0.0833,0.0,0.25,1,0,20261022-133443_compare_dev_oracle_qa
+eco_spans,refind,500,correct,12,0.3333,0.0833,0.5833,4,0,20261022-133443_compare_dev_oracle_qa
+eco_spans,span_hybrid,500,correct,12,0.0,0.0,0.0,0,0,20261022-133443_compare_dev_oracle_qa
+eco_spans,span_mmr,500,correct,12,0.0,0.0,0.0,0,0,20261022-133443_compare_dev_oracle_qa

@@ -1,0 +1,9 @@
+system,baseline,budget,metric,n,better,worse,discordant,p_exact,run_id
+eco_spans,bm25,500,correct,12,1,0,1,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,hybrid,500,correct,12,1,0,1,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,memorycpt,500,correct,12,0,1,1,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,mmr,500,correct,12,1,0,1,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,oracle,500,correct,12,0,0,0,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,refind,500,correct,12,4,0,4,0.125,20261022-133443_compare_dev_oracle_qa
+eco_spans,span_hybrid,500,correct,12,0,0,0,1.0,20261022-133443_compare_dev_oracle_qa
+eco_spans,span_mmr,500,correct,12,0,0,0,1.0,20261022-133443_compare_dev_oracle_qa

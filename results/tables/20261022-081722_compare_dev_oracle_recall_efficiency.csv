@@ -1,0 +1,5 @@
+system,metric,target,n_questions,reachable,median_tokens_to_target,mean_tokens_to_target,ci_low,ci_high,run_id
+bm25,content_recall,0.5,94,0.968,138.2,379.5,270.9,503.0,20261022-081722_compare_dev_oracle_recall
+bm25,content_recall,0.8,94,0.926,210.3,607.2,452.8,782.5,20261022-081722_compare_dev_oracle_recall
+hybrid,content_recall,0.5,39,0.923,142.3,481.6,257.8,769.2,20261022-081722_compare_dev_oracle_recall
+hybrid,content_recall,0.8,39,0.872,300.2,622.2,369.5,937.5,20261022-081722_compare_dev_oracle_recall

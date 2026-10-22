@@ -1,0 +1,13 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+eco_spans,ECO-spans,500,ALL,3,0.6667,0.0,1.0,0.0,0.0,0.0,0.7333,0.2,1.0,474.0,7175.7,0,0,7255,20261022-103209_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,482.0,5934.0,0,0,7255,20261022-103209_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,0.2,0.2,0.2,468.0,11979.0,0,0,7255,20261022-103209_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,temporal-reasoning,1,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,472.0,3614.0,0,0,7255,20261022-103209_compare_dev_oracle_qa
+hybrid,hybrid_rrf,500,ALL,3,0.6667,0.0,1.0,0.5,0.0,1.0,0.5,0.0,1.0,464.0,7175.7,0,0,7186,20261022-103209_compare_dev_oracle_qa
+hybrid,hybrid_rrf,500,knowledge-update,1,1.0,1.0,1.0,0.5,0.5,0.5,0.5,0.5,0.5,489.0,5934.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
+hybrid,hybrid_rrf,500,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,498.0,11979.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
+hybrid,hybrid_rrf,500,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,405.0,3614.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
+oracle,oracle_evidence[hybrid_rrf],500,ALL,3,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,452.0,7175.7,0,0,7186,20261022-103209_compare_dev_oracle_qa
+oracle,oracle_evidence[hybrid_rrf],500,knowledge-update,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,458.0,5934.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
+oracle,oracle_evidence[hybrid_rrf],500,multi-session,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,493.0,11979.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
+oracle,oracle_evidence[hybrid_rrf],500,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,405.0,3614.0,0,0,7186,20261022-103209_compare_dev_oracle_qa
