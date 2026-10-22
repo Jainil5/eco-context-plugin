@@ -297,8 +297,8 @@ Read honestly, this is a negative result about the testbed, not about the mechan
   two thirds of these questions have a pool of fewer than two sessions, and supersession needs two dated restatements.
   The mechanisms were built for the failure modes of a ~115K-token haystack — stale earlier statements, evidence split
   across several sessions — which is the view where the search problem is real. A first full-view probe is running
-  there (`compare.view=full`, 8 stratified dev questions, B in {250, 500}, run `20261022-142739`); until its table is
-  in this repo no claim is made about what the mechanisms do.
+  there (`compare.view=full`, 8 stratified dev questions, B in {250, 500}); its run id will be cited here when its
+  table is in this repo, and until then no claim is made about what the mechanisms do.
 
 ### The premise, measured: is top-k actually redundant?
 
