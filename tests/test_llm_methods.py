@@ -123,6 +123,82 @@ def test_parse_action():
     assert parse_action("no action here") == (None, {})
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_refind_note_indices_count_across_searches(services):
+    """The failure that made ReFind score 0 on a whole run: search 1 returns the evidence, the agent looks again,
+    the second search returns nothing (its sessions are already excluded), and `take_note` could then only address
+    the empty second result set - so the method ended with an empty context. Numbers are corpus-wide now."""
+    svc, _ = services
+    q = make_q()
+
+    class LateNote:
+        model_name, temperature = "scripted-late", 0.0
+
+        def bind(self, **kw):
+            return self
+
+        def invoke(self, messages):
+            n = sum(1 for m in messages if m[0] == "assistant")
+            script = ['Thought: first look.\nAction: search_chatrecord\nAction Input: {"keywords": ["cat name"], "top_k": 5}',
+                      'Thought: look again.\nAction: search_chatrecord\nAction Input: {"keywords": ["gardening"], "top_k": 5}',
+                      'Thought: nothing new; save the first hit.\nAction: take_note\nAction Input: {"indices": [1]}',
+                      'Thought: done.\nAction: finish_search\nAction Input: {}']
+            return AIMessage(script[min(n, 3)])
+
+    base = svc.llms["query"]
+    svc.llms["query"] = LLMClient(LateNote(), base.cache, base.logger, method="t")
+    m = ReFind(svc)
+    r = m.build_context(q.question, m.build_memory(q), 400, q.question_date)
+    assert r.trace["searches"] == 2 and r.trace["n_notes"] == 1
+    assert "Miso" in r.context and r.n_tokens <= 400
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_refind_blocks_do_not_repeat_the_same_unit(services):
+    """The +-2 window around two neighbouring hits used to paste the same conversation into one observation several
+    times over - one probe measured 96K characters of observation for a 52K-character view, which is why the agent
+    lost the thread and never noted anything."""
+    from systems.refind.refind import ReFindSearch, make_units
+
+    eng = ReFindSearch(make_units(make_q().haystack))
+    blocks = eng.search(["gardening"], top_k=5)
+    idxs = [u.idx for b in blocks for u in b]
+    assert blocks and len(idxs) == len(set(idxs)), "one unit may appear in only one block of one search"
+
+
+def test_refind_blank_agent_reply_ends_collection_instead_of_failing_the_question(services, no_sleep):
+    """NIM sometimes answers with nothing at all. That used to kill the job; now the notes already saved are what
+    the reader gets, and the blank is counted so the trace shows it (`trace.blank_replies`)."""
+    svc, _ = services
+    q = make_q()
+
+    class ThenBlank:
+        model_name, temperature = "scripted-blank", 0.0
+
+        def bind(self, **kw):
+            return self
+
+        def invoke(self, messages):
+            n = sum(1 for m in messages if m[0] == "assistant")
+            script = ['Thought: first look.\nAction: search_chatrecord\nAction Input: {"keywords": ["cat name"]}',
+                      'Thought: save it.\nAction: take_note\nAction Input: {"indices": [1]}',
+                      '']
+            return AIMessage(script[min(n, 2)])
+
+    base = svc.llms["query"]
+    svc.llms["query"] = LLMClient(ThenBlank(), base.cache, base.logger, method="t")
+    m = ReFind(svc)
+    r = m.build_context(q.question, m.build_memory(q), 400, q.question_date)
+    assert r.trace["blank_replies"] == 1 and r.trace["n_notes"] == 1
+    assert "Miso" in r.context, "the note saved before the blank must still reach the reader"
+
+
+def test_refind_parse_action_variants():
+    assert parse_action('Action: search_chatrecord\nAction Input: {"keywords": "cat"}') == \
+           ("search_chatrecord", {"keywords": "cat"})
+    assert parse_action('Action: take_note\nAction Input: not json') == ("take_note", {})
+
+
 def test_fact_rendering_shows_resolved_event_date():
     from systems.eco.extract import MemoryUnit
     from systems.eco.method import render_fact
