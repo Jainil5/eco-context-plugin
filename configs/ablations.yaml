@@ -1,0 +1,11 @@
+extends: compare.yaml
+
+# Ablations of ONE component: the objective. Every system here is `eco_spans` (systems/eco/spans.py) with a single
+# mechanism switched on in systems/eco/objective.py, plus the two same-unit retrieval controls. They are not
+# competing systems and are not how the method is presented - the headline comparison is configs/compare.yaml, which
+# puts one whole architecture against the whole baselines (retrieval top-k / MMR at both units, ReFind, MemoryCPT).
+#
+# Run it as:  uv run python scripts/run_compare.py config=ablations.yaml
+compare:
+  systems: [eco_spans, eco_sup, eco_clos, eco_facet, eco_sess, eco_sess_x2, eco_all,
+            eco_full, span_hybrid, span_mmr]

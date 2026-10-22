@@ -10,7 +10,10 @@ from core.llm.cache import DiskCache
 from core.llm.client import EmbeddingClient
 from core.llm.cost import CostLogger, Pricing
 from core.llm.tokenizer import count_tokens
-from systems import LLM_FREE, build_system
+from systems import LLM_FREE, SPAN_VARIANTS, build_system
+
+SPAN_SYSTEMS = {"span_hybrid", "span_mmr"} | set(SPAN_VARIANTS)  # candidates are sentences, not turns
+OPTIMIZERS = {"eco"} | set(SPAN_VARIANTS)  # they skip items that add no coverage, so they need not use everything
 
 
 class BagEmbed:
@@ -52,9 +55,16 @@ def test_llm_free_systems_respect_budget_and_provenance(services, name, budget):
     assert r.n_tokens == count_tokens(r.context) <= budget
     assert set(r.verbatim_turn_ids) <= set(r.source_turn_ids) <= {t.turn_id for t in q.haystack}
     if budget == 1000:  # everything fits
-        assert "s0:2" in r.verbatim_turn_ids
-        if name != "eco":  # eco skips zero-gain turns (exact duplicates under the embedding)
-            assert set(r.verbatim_turn_ids) == {t.turn_id for t in q.haystack}
+        if name not in OPTIMIZERS:  # the optimizer skips spans/turns that add no coverage
+            assert set(r.source_turn_ids) == {t.turn_id for t in q.haystack}
+        if name in SPAN_SYSTEMS:
+            # spans deliver raw sentences, not whole turns: turn-level verbatim recall must stay 0 for them,
+            # and content_recall is what scores the partial delivery.
+            assert "s0:2" in r.source_turn_ids and not r.verbatim_turn_ids
+        else:
+            assert "s0:2" in r.verbatim_turn_ids
+            if name != "eco":  # eco skips zero-gain turns (exact duplicates under the embedding)
+                assert set(r.verbatim_turn_ids) == {t.turn_id for t in q.haystack}
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")

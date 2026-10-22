@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 from core.data.longmemeval import Question, Turn
 from core.llm.tokenizer import get_tokenizer
+from core.text import sentences
 
 
 @dataclass
@@ -50,6 +51,40 @@ def turn_sort_key(t: Turn) -> tuple:
 
 def turn_item(t: Turn) -> Item:
     return Item(render_turn(t), [t.turn_id], turn_sort_key(t))
+
+
+@dataclass
+class Span:
+    """One sentence-sized piece of a raw turn: `text` is the retrieval key, `item` what the reader sees."""
+    turn_index: int
+    turn_id: str
+    text: str
+    item: Item
+
+
+def span_units(turns: list[Turn], tok, min_tokens: int = 8) -> list[Span]:
+    """Sentence-level renderings of every turn: one Span per sentence, raw text, provenance = its turn.
+
+    The first span of a turn carries the full dated turn header; later spans carry only the turn id, so the
+    reader can still attribute each sentence without paying the date and role again. Items are verbatim=False:
+    a span is raw gold text but not the whole gold turn, and turn-level verbatim recall must not credit it as
+    if it were (content_recall scores partial delivery).
+    """
+    out: list[Span] = []
+    for ti, t in enumerate(turns):
+        date = t.session_date.strftime("%Y-%m-%d") if t.session_date else "unknown date"
+        sid, idx = t.turn_id.rsplit(":", 1)
+        pieces: list[str] = []
+        for s in sentences(t.text):
+            if pieces and tok.count(s) < min_tokens:  # too short to be worth a header of its own
+                pieces[-1] = f"{pieces[-1]} {s}"
+            else:
+                pieces.append(s)
+        for si, s in enumerate(pieces):
+            text = f"[{date} | {t.turn_id}] {t.role}: {s}" if si == 0 else f"[{t.turn_id}] {s}"
+            key = (t.session_date or datetime.min, sid, int(idx), si)
+            out.append(Span(ti, t.turn_id, s, Item(text, [t.turn_id], key, verbatim=False)))
+    return out
 
 
 def fill_items(ranked: list[Item], budget: int, query_date: datetime | None,
