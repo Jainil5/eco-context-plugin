@@ -35,10 +35,13 @@ htmlcov/
 .DS_Store
 *.log
 
-# Docs, notes and agent files stay local; the repo ships implementation + README only
+# Docs, notes and agent files stay local; the repo ships implementation + README only.
+# The exception is the reimplementation-deviations file, because the published baseline numbers are not
+# interpretable without it (README and two system modules cite it).
 *.md
 !README.md
-/docs/
+/docs/*
+!/docs/reimplementation_notes.md
 /demo/
 
 # Legacy POC code at the root (superseded by core/ + systems/; kept in demo/). Delete locally when ready.

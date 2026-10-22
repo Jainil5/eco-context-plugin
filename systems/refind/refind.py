@@ -14,6 +14,7 @@ from datetime import datetime
 
 from core.data.longmemeval import Question, Turn
 from core.context import ContextResult, Item, fill_items, render_turn, turn_sort_key
+from core.llm.client import EmptyResponseError
 from core.retrieval.bm25 import BM25Index
 
 SYSTEM_PROMPT = """You are a research assistant collecting evidence from a user's conversation history. You are NOT answering — only gathering.
@@ -31,7 +32,8 @@ search → take_note → search again → ... → finish
 
 ## Rules
 1. After EVERY search, review ALL results and save ANY that MIGHT be relevant. Missed info is LOST.
-2. Call take_note BEFORE your next search. Previous results become inaccessible after a new search.
+2. Call take_note BEFORE your next search. Result numbers keep counting up across searches, so take_note can
+   still save a result an earlier search showed - but do not rely on it, save as you go.
 3. Don't answer — only collect. Try diverse keywords.
 4. If no results are relevant, skip take_note and go directly to search_chatrecord or finish_search.
 
@@ -115,19 +117,25 @@ class ReFindSearch:
             sess[u.session_id] = sess.get(u.session_id, 0.0) + scores[u.idx]
         srank = {s: i for i, s in enumerate(sorted(sess, key=lambda s: (-sess[s], s)), 1)}
         fused = sorted(cand, key=lambda u: (-(1 / (self.rrf_k + r1[u.idx]) + 1 / (self.rrf_k + srank[u.session_id])), u.idx))
-        blocks = []
+        blocks, emitted = [], set()
         for u in fused[:top_k]:
-            blocks.append([v for v in self.units[max(0, u.idx - self.window): u.idx + self.window + 1]
-                           if v.session_id == u.session_id])
+            # the +-2 window overlaps between neighbouring hits; without this the same unit is pasted into the
+            # observation several times (one probe: 10 blocks, 96K chars for a 30K-char view)
+            blk = [v for v in self.units[max(0, u.idx - self.window): u.idx + self.window + 1]
+                   if v.session_id == u.session_id and v.idx not in emitted]
+            if not blk:
+                continue
+            emitted |= {v.idx for v in blk}
+            blocks.append(blk)
         self.seen |= {b[0].session_id for b in blocks}
         return blocks
 
 
-def format_results(blocks: list[list[Unit]]) -> str:
+def format_results(blocks: list[list[Unit]], start: int = 1) -> str:
     if not blocks:
         return "No results."
     out = []
-    for i, b in enumerate(blocks, 1):
+    for i, b in enumerate(blocks, start):
         date = b[0].date.strftime("%Y/%m/%d") if b[0].date else "unknown"
         out.append(f"[{i}] session {b[0].session_id} ({date})\n" + "\n".join(u.text for u in b))
     return "\n\n".join(out)
@@ -149,10 +157,18 @@ class ReFind:
         msgs = [{"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": f"Question: {query}\nCurrent date: {date}\nBegin collecting evidence."}]
         notes: list[list[Unit]] = []
-        last: list[list[Unit]] = []
-        searches, bad, steps = 0, 0, []
+        shown: list[list[Unit]] = []  # every block ever returned, numbered across searches; see the deviation note
+        searches, bad, blanks, steps = 0, 0, 0, []
         for _ in range(2 * self.max_searches + 2):
-            reply = llm.complete(msgs, stage="query_time", qid=memory["qid"], max_tokens=self.max_tokens).text
+            try:
+                reply = llm.complete(msgs, stage="query_time", qid=memory["qid"], max_tokens=self.max_tokens).text
+            except EmptyResponseError:
+                # the model answered with nothing, after the client's own retries. The agent loop cannot proceed on an
+                # empty Action, so stop collecting and let the reader answer from the notes already saved. This only
+                # gives ReFind a fairer try than failing the whole question, and it is counted in the trace.
+                blanks += 1
+                steps.append({"action": "<empty reply>", "args": {}})
+                break
             action, args = parse_action(reply)
             steps.append({"action": action, "args": args})
             msgs.append({"role": "assistant", "content": reply})
@@ -161,22 +177,30 @@ class ReFind:
             if action == "search_chatrecord" and searches < self.max_searches:
                 kws = args.get("keywords") or []
                 kws = [kws] if isinstance(kws, str) else [str(k) for k in kws]
-                last = engine.search(kws, int(args.get("top_k", self.top_k)), args.get("date_from"), args.get("date_to"))
+                # the paper's top_k is a fixed hyperparameter (5); a model asking for more is capped, otherwise one
+                # search returns the whole view and the budget cut in stage 2 has nothing left to do
+                try:
+                    k = int(args.get("top_k", self.top_k))
+                except (TypeError, ValueError):
+                    k = self.top_k
+                new = engine.search(kws, min(max(k, 1), self.top_k), args.get("date_from"), args.get("date_to"))
+                shown += new
                 searches += 1
-                obs = format_results(last)
+                obs = format_results(new, start=len(shown) - len(new) + 1)
                 if searches == self.max_searches:
                     obs += "\n\n(Search limit reached: save anything relevant with take_note, then finish_search.)"
             elif action == "search_chatrecord":
-                obs = "Search limit reached. Use take_note on the last results or finish_search."
+                obs = "Search limit reached. Use take_note on the results shown so far, or finish_search."
             elif action == "take_note":
-                idx = [i for i in args.get("indices", []) if isinstance(i, int) and 1 <= i <= len(last)]
-                notes += [last[i - 1] for i in idx]
+                idx = [i for i in args.get("indices", []) if isinstance(i, int) and 1 <= i <= len(shown)]
+                notes += [shown[i - 1] for i in idx]
                 obs = f"Saved {len(idx)} result(s)."
             else:
                 bad += 1
                 obs = "Invalid action. Use search_chatrecord, take_note or finish_search with a JSON Action Input."
             msgs.append({"role": "user", "content": NEXT.format(obs)})
-        return notes, {"steps": steps, "searches": searches, "invalid_actions": bad}
+        return notes, {"steps": steps, "searches": searches, "invalid_actions": bad, "blank_replies": blanks,
+                       "blocks_shown": len(shown)}
 
     def build_context(self, query, memory, token_budget, query_date=None) -> ContextResult:
         notes, trace = self.collect(query, memory, query_date)
