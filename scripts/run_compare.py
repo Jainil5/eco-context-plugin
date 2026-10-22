@@ -1,6 +1,7 @@
 """Compare context-optimization systems on LongMemEval-S. Usage:
   python scripts/run_compare.py                                   # configs/compare.yaml
   python scripts/run_compare.py compare.eval=qa compare.n_questions=20 "compare.systems=[bm25,eco]"
+  python scripts/run_compare.py config=ablations.yaml              # a different config in configs/
 """
 import sys
 import time
@@ -25,7 +26,10 @@ from core.rundir import new_run_dir  # noqa: E402
 from core.runner import Runner  # noqa: E402
 from systems import LLM_FREE, NEEDS_EMBEDDINGS  # noqa: E402
 
-cfg = load_config(CONFIG_DIR / "compare.yaml", sys.argv[1:])
+argv = [a for a in sys.argv[1:] if not a.startswith("config=")]
+conf = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("config=")), "compare.yaml")
+stem = Path(conf).stem
+cfg = load_config(CONFIG_DIR / conf, argv)
 c = cfg["compare"]
 systems, budgets, mode = c["systems"], cfg["budgets"], c["eval"]
 data_path = REPO_ROOT / cfg["data"]["longmemeval_s"]
@@ -70,7 +74,7 @@ if mode == "qa":
 cost_guard(plan, Pricing(cfg.get("pricing", {})), cfg.get("max_usd"))
 print(f"~{sum(p.n_calls for p in plan)} chat-model calls (cached calls are free and instant)")
 
-run = new_run_dir(cfg, f"compare_{c['split']}_{c['view']}_{mode}")
+run = new_run_dir(cfg, f"{stem}_{c['split']}_{c['view']}_{mode}")
 print(f"Run dir: {run.relative_to(REPO_ROOT)}")
 t0 = time.time()
 Runner(cfg, run, chat, judge_m, emb, eval_mode=mode).run(qs, systems, budgets, workers=c["workers"])
