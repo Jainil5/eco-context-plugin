@@ -1,6 +1,7 @@
 """BM25 over short texts (rank_bm25 Okapi). Optional Porter stemming + stopword removal (ReFind setting)."""
 from __future__ import annotations
 
+import math
 import re
 import threading
 import warnings
@@ -41,10 +42,23 @@ def tokenize(text: str, stem: bool = False) -> list[str]:
     return toks
 
 
+class _BM25Okapi(BM25Okapi):
+    """rank_bm25's idf is `log(N - df + 0.5) - log(df + 0.5)`, which is *exactly zero* for every term that occurs in
+    half the documents and negative (floored at `epsilon x average_idf`) above that. On the small indexes this repo
+    actually builds - one document per session or per user/assistant unit, so 4 to 20 documents - the term that
+    identifies the question is often in half the documents, and BM25 then returns all-zero scores: ReFind's agent
+    gets 'No results.' for its own keywords and the bm25/hybrid baselines rank by nothing. Lucene's form
+    `log(1 + (N - df + 0.5) / (df + 0.5))` keeps the same ordering in df, is strictly positive, and needs no floor."""
+
+    def _calc_idf(self, nd):
+        n = self.corpus_size
+        self.idf = {w: math.log(1.0 + (n - df + 0.5) / (df + 0.5)) for w, df in nd.items()}
+
+
 class BM25Index:
     def __init__(self, texts: list[str], k1: float = 1.5, b: float = 0.75, stem: bool = False):
         self.stem = stem
-        self.bm25 = BM25Okapi([tokenize(t, stem) or ["<empty>"] for t in texts], k1=k1, b=b)
+        self.bm25 = _BM25Okapi([tokenize(t, stem) or ["<empty>"] for t in texts], k1=k1, b=b)
 
     def scores(self, query: str):
         return self.bm25.get_scores(tokenize(query, self.stem))

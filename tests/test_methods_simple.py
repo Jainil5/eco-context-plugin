@@ -64,3 +64,22 @@ def test_stemmed_tokenize_is_thread_safe():
     expected = [tokenize(t, stem=True) for t in texts]
     with ThreadPoolExecutor(8) as ex:
         assert list(ex.map(lambda t: tokenize(t, stem=True), texts)) == expected
+
+
+def test_bm25_scores_a_term_that_is_in_half_the_corpus():
+    """The indexes here are tiny (one document per session, 4-20 of them, or one per ReFind unit). rank_bm25's ATIRE
+    idf `log(N-df+0.5)-log(df+0.5)` is exactly 0 at df = N/2 and negative above it, so a question keyword that
+    appears in half the sessions scored nothing at all - 42.6% of dev oracle questions lost at least one keyword and
+    ReFind's own agent got 'No results.' for the term it searched. The non-negative form keeps the ordering and the
+    penalty for common terms without the blind spot."""
+    import numpy as np
+
+    from core.retrieval.bm25 import BM25Index
+
+    docs = ["alpha one filler", "alpha two filler", "beta three filler", "gamma four filler"]
+    ix = BM25Index(docs)
+    sc = ix.scores("alpha")
+    assert sc.max() > 0, "a term in 2 of 4 documents must not score zero"
+    assert list(np.argsort(-sc)[:2]) == [0, 1]
+    assert sc[0] < ix.scores("gamma")[3], "a common term still scores below a rare one"
+    assert ix.scores("zzz_not_a_term").max() == 0.0, "an absent term must still score nothing"
