@@ -16,6 +16,19 @@ compare:
   # Pre-registered win rule, written before those runs: an ECO variant counts as better than retrieval only if its
   # paired answer_in_ctx beats BOTH span_hybrid and span_mmr at B=250 and B=500 with the 95% paired bootstrap CI
   # excluding zero. Anything less is reported as "no measurable difference", not as a win.
+  # Pre-registered architecture claim, written 2026-10-24 before the runs below (the variant-level rule above had
+  # four consecutive nulls - eco mechanisms, adaptive tau, full view, derived facts - so the claim under test is no
+  # longer "selection beats retrieval" but "the whole zero-LLM architecture is Pareto-equal to the LLM systems"):
+  #   PRIMARY  - at equal context budget (B=250, B=500) on dev-oracle n=94 at Tier-2 qa, `eco_spans` accuracy is
+  #              statistically indistinguishable from BOTH `eco_facts` and `memorycpt` (paired correct diff with
+  #              the 95% CI covering zero), while eco_spans makes zero LLM calls at construction and query time.
+  #   SECONDARY- `eco_spans` beats `refind` (query-time LLM agent) with the paired CI excluding zero.
+  #   FAIL     - either LLM system is ahead with a CI excluding zero at both budgets: then zero-LLM is NOT
+  #              Pareto-equal and that is reported as the result, not narrowed away.
+  # The previously logged 12-question pilot (20261022-133443) was used to design this claim; these runs are the
+  # honest n=94 test, and the 12-question numbers stay in the record.
+  # TESTED 2026-10-25: PRIMARY failed (memorycpt +0.181 significant at B=250), SECONDARY held. Full verdict:
+  # README "The architecture claim, tested" section; canonical run 20261025-164642_compare_dev_oracle_qa.
   systems: [eco_spans, span_hybrid, span_mmr, eco, bm25, hybrid, mmr]
   workers: 8
   pool_models: null        # e.g. [openai/gpt-oss-20b] to pin one provider from model.py LLM_POOL

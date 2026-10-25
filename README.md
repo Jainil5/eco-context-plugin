@@ -64,6 +64,19 @@ How the compared systems spend their effort:
 
 ## Results
 
+### At a glance
+
+![QA accuracy vs context budget, all systems](results/figures/accuracy_vs_budget.png)
+
+![Accuracy vs reader context cost at B=500](results/figures/accuracy_vs_cost.png)
+
+Both charts are generated from the canonical n=94 dev-oracle Tier-2 run
+`results/runs/20261025-164642_compare_dev_oracle_qa` (`results/tables/20261025-164642_compare_dev_oracle_qa.csv`)
+by `python scripts/make_figures.py` — nothing in them is typed by hand. The shape they show, in one line:
+zero-LLM selection is a plateau (the triangles sit on top of each other), query-time LLM agents lose badly, and
+the only architecture off that plateau is the one that spends LLM calls *offline* to compress — detailed,
+pre-registered verdict below under "The architecture claim, tested".
+
 ### The whole system, end to end (dev, oracle view, one shared reader and judge)
 
 Each row is a whole system: its own memory, its own way of spending the budget, then the same reader answering the
@@ -296,9 +309,96 @@ Read honestly, this is a negative result about the testbed, not about the mechan
 - **Why the oracle view cannot see any of this working.** `breadth_queries` = 0.63 and `sessions_in_pool` = 1.91:
   two thirds of these questions have a pool of fewer than two sessions, and supersession needs two dated restatements.
   The mechanisms were built for the failure modes of a ~115K-token haystack — stale earlier statements, evidence split
-  across several sessions — which is the view where the search problem is real. A first full-view probe is running
-  there (`compare.view=full`, 8 stratified dev questions, B in {250, 500}); its run id will be cited here when its
-  table is in this repo, and until then no claim is made about what the mechanisms do.
+  across several sessions — which is the view where the search problem is real. The first full-view probe
+  (`results/runs/20261024-010714_compare_dev_full_recall`, 8 stratified dev questions, B 250/500) is in this repo, and
+  it is another null: the conditions the mechanisms were built for *are* present there (22.6 sessions in the candidate
+  pool per question, vs 1.9 in the oracle view; the supersession variant fired on 50 span pairs per question), yet every
+  variant's `answer_in_ctx` equals the frozen one at both budgets, and the controls lead on `content_recall`
+  (span_hybrid 0.205 at B=250, the variants 0.092–0.205; at B=500, 0.364 vs 0.105–0.354). n=8 licenses nothing beyond
+  "no mechanism moved the needle when the search problem was real".
+
+### Derived facts: the zero-LLM synthesis attempt, and the second null (dev, oracle view, n = 94)
+
+Every mechanism above edits the *similarity/relevance* matrices of a selection over raw spans. `eco_derive` changed
+the candidate pool itself with a third rendering kind that costs no model calls: deterministic templated aggregates
+over the query's facets — "'coffee' is mentioned 6 times across 4 conversations, first 2023-05-27, most recent
+2023-05-28" — added as *extra* selectable items (~22 tokens where their evidence is ~20× that), additive-only so a
+fact can never substitute for its evidence's demand rows (`systems/eco/derive.py`, `DERIVE_FID`/`DERIVE_BETA`). The
+premise was the one measured opening in this repo: at Tier-2 (`results/runs/20261022-133443_compare_dev_oracle_qa`,
+12 questions, B=500), MemoryCPT's LLM synthesis answered 9/12 where the verbatim-evidence oracle managed 8/12 and
+`eco_spans` 8/12; a derived fact is the free version of "state a relation no single span states".
+
+It is null, and the autopsy says why (`results/runs/20261024-023543_compare_dev_oracle_recall`, 94 dev-oracle
+questions, B 250/500/1000; paired table `..._paired_eco_derive_trace_metrics_answer_in_ctx.csv`):
+
+![eco_derive paired answer_in_ctx differences](results/figures/eco_derive_null.png)
+
+- **The pre-registered rule is not met — this is a loss, not a tie.** At B=250 paired `answer_in_ctx` is −0.053
+  [−0.106, −0.011] vs `eco_spans`, −0.053 [−0.106, 0.000] vs `span_hybrid`, −0.048 [−0.101, 0.000] vs `span_mmr`
+  (6 questions worse, 1 better); B=500 is within noise; B=1000 is exactly 0.000 everywhere.
+- **Why it loses**: facts were selected on 66/94 questions, and the losses concentrate on knowledge-update questions
+  (4 of 6) — a count/date aggregate flattens the old→new distinction and displaces the span holding the current value.
+- **Why it cannot win any coverage metric**: `scripts/synthesis_probe.py` classifies the cohort by where the gold
+  answer text can land at all (55 questions turn-reachable, 0 span-only, **39 synthesis-required** — the answer in no
+  single turn). On the 39, eco_derive's paired diff is 0.000 at B=250, −0.013/−0.026 at B=500, 0.000 at B=1000 — zero
+  wins. Of the 195 jobs whose context rendered a fact, only 18 contained a fact holding the gold answer string, and
+  spot-checking showed those were substring accidents ("much" inside the answer). The templates state counts and
+  dates; synthesis questions want entity and amount values, which no aggregation of mentions produces.
+- **And the view has no headroom for any selection design anyway**: at B=1000 every system ties because the oracle
+  view's evidence fits the budget — on `answer_in_ctx` the optimal oracle-view selection *is* greedy top-k.
+
+`eco_derive` stays registered (flag-gated, default off) as an archived negative; the unit tests in
+`tests/test_derive.py` document the mechanism as built, including the 60-token render cap and its truncation rule.
+
+### The architecture claim, tested (dev, oracle view, n = 94, Tier-2)
+
+With every selection-side mechanism measured null, the claim pre-registered on 2026-10-24 (`configs/compare.yaml`,
+written before these runs) moved the unit of comparison from knob to architecture: **the whole zero-LLM facility-location
+pipeline is Pareto-equal to the LLM systems at equal context budget** — PRIMARY: `eco_spans` Tier-2 accuracy
+statistically indistinguishable from BOTH `eco_facts` and `memorycpt` (paired `correct` bootstrap CI covering zero) at
+B=250 and B=500; SECONDARY: beats `refind` with the CI excluding zero; FAIL: either LLM system ahead with a CI
+excluding zero at both budgets.
+
+Test: `results/runs/20261025-164642_compare_dev_oracle_qa` — 7 systems × 3 budgets × 94 questions = 1974 rows, zero
+errors (the free gpt-oss routes flaked 14 jobs across the first passes; SQLite-cache replay repaired them), paired
+table `results/tables/20261025-164642_compare_dev_oracle_qa_paired_eco_spans_correct.csv`. Accuracy (shared reader +
+judge), mean context tokens, and model calls beyond the two shared eval calls per row:
+
+| system | B=250 | B=500 | B=1000 | ctx tokens | extra LLM calls/q |
+|---|---|---|---|---|---|
+| memorycpt | **0.798** | **0.809** | **0.819** | 96–127 | 4.7 (build + per-query summary) |
+| eco_facts | 0.532 | 0.734 | 0.809 | 230–952 | 1.7 (build only) |
+| eco_spans | 0.617 | 0.702 | 0.766 | 236–964 | **0** |
+| span_hybrid | 0.617 | 0.713 | 0.745 | 236–965 | 0 |
+| bm25 | 0.617 | 0.702 | 0.745 | 223–956 | 0 |
+| span_mmr | 0.585 | 0.670 | 0.734 | 236–966 | 0 |
+| refind | 0.234 | 0.330 | 0.340 | 141–566 | 8.6 (query-time agent) |
+
+![Paired differences with bootstrap CIs](results/figures/paired_forest.png)
+
+Paired view of the same run (`results/tables/20261025-164642_compare_dev_oracle_qa_paired_eco_spans_correct.csv`):
+squares are cells where the 95% CI excludes zero — one against us (memorycpt at B=250), three for us (refind at
+every budget), everything else a coin flip.
+
+Verdict against the pre-registered rule, stated as a miss where it is one:
+
+- **PRIMARY: failed.** vs `memorycpt` at B=250 the paired diff is **−0.181 [−0.287, −0.075]** — significantly behind
+  at the tightest budget. At B=500 (−0.106 [−0.223, +0.011]) and B=1000 (−0.053 [−0.149, +0.043]) it is within noise,
+  and vs `eco_facts` every CI covers zero (B=250 even leans ours: +0.085 [−0.043, +0.213]). The literal FAIL clause
+  ("ahead with a CI excluding zero at *both* budgets") did not trigger — memorycpt is significant only at B=250 — but
+  the claim as written requires indistinguishability at B=250 and B=500, and it is not met. Zero-LLM is **not**
+  Pareto-equal at tight budgets: offline LLM compression answers at ~96 tokens what budgeted selection of verbatim
+  evidence cannot at 2.5× that.
+- **SECONDARY: held, decisively.** +0.383/+0.372/+0.426 vs `refind`, all CIs excluding zero — and ReFind was measured
+  at its raised ceiling, with the deviation-6 auto-save fallback (it fired on 108/282 refind contexts, 38%: the agent
+  searched, saw the blocks, and ended without calling `take_note`).
+- **Among equal-cost systems the zero-LLM field is a plateau, not a win**: eco_spans ties bm25 and span_hybrid exactly
+  at B=250 (0.617 all three, paired diff 0.0), and no selection variant separates from greedy top-k. What accuracy is
+  bought in this view is bought by LLM calls at construction time, not by better selection.
+
+The opening this leaves is explicit: the gap is a *compression* gap at small budgets, and the oracle view's ceiling at
+B=1000 caps what any selection can do here — so the next claim has to be made on designs that condense evidence
+without an LLM per question, not select among it.
 
 ### The premise, measured: is top-k actually redundant?
 
@@ -340,6 +440,7 @@ one is the honest version of the record, and because it shows what an unvalidate
 | `eco_spans` | the same optimizer over sentence spans, one item per claim (`systems/eco/spans.py`) | none (embeddings) |
 | `eco_sup`, `eco_clos`, `eco_facet`, `eco_sess`, `eco_full`, `eco_all` | `eco_spans` with one or more set-level mechanisms on: supersession, hard breadth, facets, soft breadth (registry `SPAN_VARIANTS`; every mechanism is off by default) | none (embeddings) |
 | `span_hybrid`, `span_mmr` | fused top-k / MMR over the same span pool — granularity controls for `eco_spans` | none (embeddings) |
+| `eco_derive` | `eco_spans` plus zero-LLM derived aggregation facts (counts, recency, cross-session mention sets) as extra candidates — archived null, see the derived-facts section | none (embeddings) |
 | `eco_facts` | `eco` + LLM-extracted facts as retrieval keys and cheaper renderings | construction |
 | `memorycpt` | MemoryCPT-lite (reimpl.): memory store + query-aware summary | construction + query |
 | `refind` | ReFind (reimpl.): ReAct search agent that collects notes | query |
@@ -418,6 +519,15 @@ uv run python scripts/run_compare.py compare.eval=qa compare.n_questions=12 "bud
 # ... and the two paired tests on it: bootstrap CI for size, exact McNemar for direction
 uv run python scripts/paired_compare.py results/runs/<run_id> eco_spans correct
 uv run python scripts/mcnemar.py results/runs/<run_id> eco_spans correct
+
+# The architecture claim at full n=94 across three budgets (the canonical run 20261025-164642 above). Free
+# gpt-oss routes throttle under load, so a pass can end with a few transient job errors: re-run the identical
+# command and the SQLite cache replays finished calls instantly, recomputing only what failed.
+uv run python scripts/run_compare.py compare.eval=qa "compare.systems=[eco_spans,eco_facts,memorycpt,refind,bm25,span_hybrid,span_mmr]" \
+  "compare.pool_models=[gpt-oss:20b-cloud,openai/gpt-oss-20b]"
+
+# The README charts, regenerated from the logged tables (nothing hand-typed)
+uv run python scripts/make_figures.py
 ```
 
 Settings live in `configs/compare.yaml`; any field can be overridden as `a.b=value`. Every run writes
