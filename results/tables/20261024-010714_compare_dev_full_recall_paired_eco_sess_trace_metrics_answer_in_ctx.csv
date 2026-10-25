@@ -1,0 +1,17 @@
+system,baseline,budget,metric,n,mean_diff,ci_low,ci_high,better,worse,run_id
+eco_sess,eco_adapt_elbow,250,answer_in_ctx,8,-0.0625,-0.1875,0.0,0,1,20261024-010714_compare_dev_full_recall
+eco_sess,eco_adapt_fit,250,answer_in_ctx,8,-0.0625,-0.1875,0.0,0,1,20261024-010714_compare_dev_full_recall
+eco_sess,eco_clos,250,answer_in_ctx,8,0.0,0.0,0.0,0,0,20261024-010714_compare_dev_full_recall
+eco_sess,eco_facet,250,answer_in_ctx,8,0.0,0.0,0.0,0,0,20261024-010714_compare_dev_full_recall
+eco_sess,eco_spans,250,answer_in_ctx,8,-0.0625,-0.1875,0.0,0,1,20261024-010714_compare_dev_full_recall
+eco_sess,eco_sup,250,answer_in_ctx,8,-0.0625,-0.1875,0.0,0,1,20261024-010714_compare_dev_full_recall
+eco_sess,span_hybrid,250,answer_in_ctx,8,-0.125,-0.25,0.0,0,2,20261024-010714_compare_dev_full_recall
+eco_sess,span_mmr,250,answer_in_ctx,8,-0.0625,-0.1875,0.0,0,1,20261024-010714_compare_dev_full_recall
+eco_sess,eco_adapt_elbow,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,eco_adapt_fit,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,eco_clos,500,answer_in_ctx,8,0.0,0.0,0.0,0,0,20261024-010714_compare_dev_full_recall
+eco_sess,eco_facet,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,eco_spans,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,eco_sup,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,span_hybrid,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall
+eco_sess,span_mmr,500,answer_in_ctx,8,-0.25,-0.5,-0.0625,0,3,20261024-010714_compare_dev_full_recall

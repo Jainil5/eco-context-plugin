@@ -1,0 +1,4 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+refind,ReFind (reimpl.),250,ALL,94,0.234,0.1489,0.3298,0.2943,0.2137,0.3794,0.2943,0.2137,0.3794,141.3,5751.3,0,12151,0,20261025-153113_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,ALL,94,0.3298,0.234,0.4255,0.3777,0.289,0.4645,0.3777,0.289,0.4645,268.2,5751.3,0,12151,0,20261025-153113_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,ALL,94,0.3404,0.2447,0.4362,0.4043,0.3183,0.4911,0.4043,0.3183,0.4911,565.8,5751.3,0,12151,0,20261025-153113_compare_dev_oracle_qa

@@ -1,0 +1,13 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+eco_derive,ECO-spans+derived-facts,250,ALL,94,,,,0.0,0.0,0.0,0.8289,0.7617,0.8908,236.4,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+eco_spans,ECO-spans,250,ALL,94,,,,0.0,0.0,0.0,0.7534,0.6807,0.8234,236.3,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_hybrid,span_hybrid_rrf,250,ALL,94,,,,0.0,0.0,0.0,0.7812,0.7156,0.8468,236.3,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_mmr,span_mmr,250,ALL,94,,,,0.0,0.0,0.0,0.7383,0.6667,0.8074,236.5,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+eco_derive,ECO-spans+derived-facts,500,ALL,94,,,,0.0,0.0,0.0,0.9067,0.8534,0.9516,480.5,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+eco_spans,ECO-spans,500,ALL,94,,,,0.0,0.0,0.0,0.8805,0.8273,0.9301,479.6,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_hybrid,span_hybrid_rrf,500,ALL,94,,,,0.0,0.0,0.0,0.8699,0.8152,0.9218,479.4,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_mmr,span_mmr,500,ALL,94,,,,0.0,0.0,0.0,0.8867,0.8332,0.9335,479.0,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+eco_derive,ECO-spans+derived-facts,1000,ALL,94,,,,0.0,0.0,0.0,0.936,0.892,0.9725,967.3,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+eco_spans,ECO-spans,1000,ALL,94,,,,0.0,0.0,0.0,0.9401,0.9007,0.9752,964.4,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_hybrid,span_hybrid_rrf,1000,ALL,94,,,,0.0,0.0,0.0,0.9374,0.894,0.9738,964.9,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall
+span_mmr,span_mmr,1000,ALL,94,,,,0.0,0.0,0.0,0.9321,0.8887,0.9707,965.7,5751.3,0,0,5804,20261024-023543_compare_dev_oracle_recall

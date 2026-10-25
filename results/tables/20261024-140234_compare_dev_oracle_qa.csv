@@ -1,0 +1,106 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+bm25,bm25_turns,250,ALL,4,0.75,0.25,1.0,0.625,0.125,1.0,0.625,0.125,1.0,228.2,6057.5,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,250,knowledge-update,1,1.0,1.0,1.0,0.5,0.5,0.5,0.5,0.5,0.5,227.0,5934.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,245.0,11979.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,250,single-session-user,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,198.0,3019.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,250,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,243.0,3298.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,ALL,4,0.25,0.0,0.75,0.05,0.0,0.15,0.475,0.125,0.85,225.0,6057.5,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,0.5,0.5,0.5,229.0,5934.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,multi-session,1,0.0,0.0,0.0,0.2,0.2,0.2,0.4,0.4,0.4,235.0,11979.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,single-session-user,1,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,227.0,3019.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,temporal-reasoning,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,209.0,3298.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,ALL,4,0.5,0.0,1.0,0.0,0.0,0.0,0.75,0.25,1.0,237.2,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,knowledge-update,1,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,242.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,229.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,235.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,243.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,ALL,4,0.75,0.25,1.0,0.0,0.0,0.0,1.0,1.0,1.0,88.5,6057.5,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,128.0,5934.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,140.0,11979.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,50.0,3019.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,36.0,3298.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,ALL,4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,6057.5,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,knowledge-update,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,5934.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,11979.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,single-session-user,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3019.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,temporal-reasoning,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3298.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,ALL,4,0.75,0.25,1.0,0.0,0.0,0.0,0.75,0.25,1.0,233.2,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,241.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,229.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,235.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,228.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,250,ALL,4,0.75,0.25,1.0,0.0,0.0,0.0,0.75,0.25,1.0,234.2,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,250,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,241.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,250,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,234.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,250,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,234.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,250,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,228.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,500,ALL,4,0.75,0.25,1.0,0.625,0.25,1.0,0.625,0.25,1.0,438.5,6057.5,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,500,knowledge-update,1,1.0,1.0,1.0,0.5,0.5,0.5,0.5,0.5,0.5,489.0,5934.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,500,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,486.0,11979.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,500,single-session-user,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,404.0,3019.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,500,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,375.0,3298.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,ALL,4,0.75,0.25,1.0,0.9,0.7,1.0,0.9,0.7,1.0,479.0,6057.5,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,knowledge-update,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,472.0,5934.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,multi-session,1,0.0,0.0,0.0,0.6,0.6,0.6,0.6,0.6,0.6,475.0,11979.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,single-session-user,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,477.0,3019.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,492.0,3298.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,ALL,4,0.75,0.25,1.0,0.0,0.0,0.0,0.8,0.4,1.0,481.0,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,482.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.2,0.2,0.2,469.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,486.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,487.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,95.8,6057.5,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,133.0,5934.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,155.0,11979.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,55.0,3019.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,40.0,3298.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,ALL,4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,6057.5,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,knowledge-update,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,5934.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,11979.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,single-session-user,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3019.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,temporal-reasoning,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3298.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,0.8,0.4,1.0,482.0,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,482.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,0.2,0.2,0.2,471.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,486.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,489.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,500,ALL,4,0.75,0.25,1.0,0.0,0.0,0.0,0.8,0.4,1.0,475.2,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,500,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,471.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,500,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.2,0.2,0.2,469.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,500,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,486.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,500,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,475.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,1000,ALL,4,0.75,0.25,1.0,0.75,0.25,1.0,0.75,0.25,1.0,919.5,6057.5,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,1000,knowledge-update,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,958.0,5934.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,1000,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,980.0,11979.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,1000,single-session-user,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,841.0,3019.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+bm25,bm25_turns,1000,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,899.0,3298.0,0,0,0,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,ALL,4,0.75,0.25,1.0,0.9,0.7,1.0,0.9,0.7,1.0,968.5,6057.5,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,knowledge-update,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,958.0,5934.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,multi-session,1,0.0,0.0,0.0,0.6,0.6,0.6,0.6,0.6,0.6,976.0,11979.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,single-session-user,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,958.0,3019.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,temporal-reasoning,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,982.0,3298.0,8645,0,6747,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,0.85,0.55,1.0,960.0,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,962.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,0.4,0.4,0.4,963.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,960.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,955.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,92.5,6057.5,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,72.0,5934.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,187.0,11979.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,57.0,3019.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,54.0,3298.0,8370,1573,1003,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,ALL,4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,6057.5,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,knowledge-update,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,5934.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,multi-session,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,11979.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,single-session-user,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3019.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,temporal-reasoning,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,11.0,3298.0,0,19330,0,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,0.85,0.55,1.0,963.5,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,962.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,0.4,0.4,0.4,975.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,960.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,957.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,ALL,4,1.0,1.0,1.0,0.0,0.0,0.0,0.85,0.55,1.0,968.5,6057.5,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,knowledge-update,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,962.0,5934.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,multi-session,1,1.0,1.0,1.0,0.0,0.0,0.0,0.4,0.4,0.4,972.0,11979.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,single-session-user,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,970.0,3019.0,0,0,6106,20261024-140234_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,temporal-reasoning,1,1.0,1.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,970.0,3298.0,0,0,6106,20261024-140234_compare_dev_oracle_qa

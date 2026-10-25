@@ -1,0 +1,10 @@
+system,baseline,budget,metric,n,mean_diff,ci_low,ci_high,better,worse,run_id
+eco_derive,eco_spans,250,answer_in_ctx,56,-0.0536,-0.125,0.0,0,3,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_hybrid,250,answer_in_ctx,56,-0.0536,-0.125,0.0,0,3,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_mmr,250,answer_in_ctx,56,-0.0804,-0.1518,-0.0179,0,5,20261024-023022_compare_dev_oracle_recall
+eco_derive,eco_spans,500,answer_in_ctx,56,-0.0089,-0.0268,0.0,0,1,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_hybrid,500,answer_in_ctx,56,0.0089,-0.0179,0.0446,2,1,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_mmr,500,answer_in_ctx,56,0.0,-0.0268,0.0268,1,1,20261024-023022_compare_dev_oracle_recall
+eco_derive,eco_spans,1000,answer_in_ctx,56,0.0,0.0,0.0,0,0,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_hybrid,1000,answer_in_ctx,56,0.0,0.0,0.0,0,0,20261024-023022_compare_dev_oracle_recall
+eco_derive,span_mmr,1000,answer_in_ctx,56,0.0,0.0,0.0,0,0,20261024-023022_compare_dev_oracle_recall

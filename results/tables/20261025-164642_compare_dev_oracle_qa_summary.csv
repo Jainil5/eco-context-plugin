@@ -1,0 +1,22 @@
+system,system_name,budget,qtype,n,accuracy,accuracy_ci_low,accuracy_ci_high,verbatim_recall,verbatim_recall_ci_low,verbatim_recall_ci_high,evidence_recall,evidence_recall_ci_low,evidence_recall_ci_high,avg_context_tokens,avg_view_tokens,llm_build_tokens_per_q,llm_query_tokens_per_query,embedding_tokens_per_q,run_id
+bm25,bm25_turns,250,ALL,94,0.617,0.5213,0.7128,0.6023,0.5234,0.6844,0.6023,0.5234,0.6844,222.6,5751.3,0,0,0,20261025-164642_compare_dev_oracle_qa
+eco_facts,ECO+facts,250,ALL,94,0.5319,0.4255,0.6383,0.5362,0.4587,0.614,0.6385,0.5642,0.7138,230.3,5751.3,11916,0,6528,20261025-164642_compare_dev_oracle_qa
+eco_spans,ECO-spans,250,ALL,94,0.617,0.5213,0.7128,0.0,0.0,0.0,0.7534,0.6796,0.8236,236.3,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),250,ALL,94,0.7979,0.7128,0.8723,0.0,0.0,0.0,0.9762,0.9539,0.9947,95.7,5751.3,10196,2002,1169,20261025-164642_compare_dev_oracle_qa
+refind,ReFind (reimpl.),250,ALL,94,0.234,0.1489,0.3191,0.2943,0.219,0.3768,0.2943,0.219,0.3768,141.3,5751.3,0,12151,0,20261025-164642_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,250,ALL,94,0.617,0.5213,0.7234,0.0,0.0,0.0,0.7812,0.7121,0.8486,236.3,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+span_mmr,span_mmr,250,ALL,94,0.5851,0.4787,0.6809,0.0,0.0,0.0,0.7383,0.6621,0.8106,236.5,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+bm25,bm25_turns,500,ALL,94,0.7021,0.6064,0.7979,0.7472,0.6693,0.823,0.7472,0.6693,0.823,462.2,5751.3,0,0,0,20261025-164642_compare_dev_oracle_qa
+eco_facts,ECO+facts,500,ALL,94,0.734,0.6489,0.8191,0.8174,0.7562,0.8803,0.8488,0.7929,0.9025,474.1,5751.3,11916,0,6528,20261025-164642_compare_dev_oracle_qa
+eco_spans,ECO-spans,500,ALL,94,0.7021,0.6064,0.7979,0.0,0.0,0.0,0.8805,0.8245,0.9314,479.6,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),500,ALL,94,0.8085,0.7234,0.883,0.0,0.0,0.0,0.9762,0.9539,0.9947,127.1,5751.3,10196,2002,1169,20261025-164642_compare_dev_oracle_qa
+refind,ReFind (reimpl.),500,ALL,94,0.3298,0.234,0.4255,0.3777,0.2899,0.4716,0.3777,0.2899,0.4716,268.2,5751.3,0,12151,0,20261025-164642_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,500,ALL,94,0.7128,0.6277,0.7979,0.0,0.0,0.0,0.8699,0.811,0.9209,479.4,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+span_mmr,span_mmr,500,ALL,94,0.6702,0.5745,0.766,0.0,0.0,0.0,0.8867,0.831,0.9344,479.0,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+bm25,bm25_turns,1000,ALL,94,0.7447,0.6596,0.8298,0.8243,0.7596,0.8908,0.8243,0.7596,0.8908,955.5,5751.3,0,0,0,20261025-164642_compare_dev_oracle_qa
+eco_facts,ECO+facts,1000,ALL,94,0.8085,0.7234,0.883,0.894,0.8422,0.9401,0.909,0.8628,0.9504,952.4,5751.3,11916,0,6528,20261025-164642_compare_dev_oracle_qa
+eco_spans,ECO-spans,1000,ALL,94,0.766,0.6809,0.8511,0.0,0.0,0.0,0.9401,0.8975,0.977,964.4,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+memorycpt,MemoryCPT-lite (reimpl.),1000,ALL,94,0.8191,0.734,0.8936,0.0,0.0,0.0,0.9762,0.9539,0.9947,117.9,5751.3,10196,2002,1169,20261025-164642_compare_dev_oracle_qa
+refind,ReFind (reimpl.),1000,ALL,94,0.3404,0.2447,0.4362,0.4043,0.3236,0.4929,0.4043,0.3236,0.4929,565.8,5751.3,0,12151,0,20261025-164642_compare_dev_oracle_qa
+span_hybrid,span_hybrid_rrf,1000,ALL,94,0.7447,0.6596,0.8298,0.0,0.0,0.0,0.9374,0.894,0.9748,964.9,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
+span_mmr,span_mmr,1000,ALL,94,0.734,0.6489,0.8191,0.0,0.0,0.0,0.9321,0.8862,0.9693,965.7,5751.3,0,0,5804,20261025-164642_compare_dev_oracle_qa
