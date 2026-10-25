@@ -21,6 +21,7 @@ from core.context import fill_items, header
 from core.data.longmemeval import Question
 from core.llm.tokenizer import get_tokenizer
 from core.retrieval.spans import build_span_index
+from systems.eco.derive import derive_facts
 from systems.eco.objective import build_objective
 from systems.eco.select import select
 
@@ -31,11 +32,13 @@ class ECOspans:
     def __init__(self, services, top_k: int = 100, rel_tau: float | None = 2.0, sim_floor: float = 0.7,
                  min_tokens: int = 8, supersede: float | None = None, one_per: str | None = None,
                  facets: int = 0, facet_weight: float = 1.0, session_weight: float = 0.0,
-                 name: str = "ECO-spans"):
+                 auto_tau: str | None = None, derive: bool = False, name: str = "ECO-spans"):
         self.services, self.top_k, self.min_tokens = services, top_k, min_tokens
         self.rel_tau, self.sim_floor = rel_tau, sim_floor
         self.supersede, self.one_per, self.facets, self.facet_weight = supersede, one_per, facets, facet_weight
         self.session_weight = session_weight
+        self.auto_tau = auto_tau
+        self.derive = derive
         self.name = name
 
     def build_memory(self, q: Question):
@@ -47,17 +50,23 @@ class ECOspans:
         cand = [i for i, _ in fused]
         if not cand:
             return fill_items([], token_budget, query_date)
+        derived = derive_facts(ix, cand, query, query_date) if self.derive else []
         obj = build_objective(ix, cand, self.rel_tau, self.sim_floor, query, supersede=self.supersede,
                              one_per=self.one_per, facets=self.facets, facet_weight=self.facet_weight,
-                             session_weight=self.session_weight, fused=fused)
+                             session_weight=self.session_weight, fused=fused, auto_tau=self.auto_tau,
+                             derived=derived)
         avail = token_budget - get_tokenizer().count(header(query_date))  # the date line is paid for first
         S, info = select(obj.r, obj.sim, obj.fid, obj.cost, max(avail, 0), group=obj.group)
-        res = fill_items([ix.spans[cand[j]].item for j in S], token_budget, query_date)
+        items = [ix.spans[cand[j]].item if j < len(cand) else derived[j - len(cand)].item for j in S]
+        res = fill_items(items, token_budget, query_date)
         assert len(res.trace["rank_of_chosen"]) == len(S), "selected set must fit the budget exactly"
-        sessions = {ix.spans[cand[j]].turn_id.rsplit(":", 1)[0] for j in S}
+        spans_sel = [ix.spans[cand[j]] for j in S if j < len(cand)]
+        sessions = {s.turn_id.rsplit(":", 1)[0] for s in spans_sel}
         res.trace.update(info, mechanism={"supersede": self.supersede, "one_per": self.one_per,
-                                          "facets": self.facets, "session_weight": self.session_weight},
+                                          "facets": self.facets, "session_weight": self.session_weight,
+                                          "auto_tau": self.auto_tau, "derive": self.derive},
                          n_spans=len(ix.spans), n_candidates=len(cand), n_selected=len(S),
-                         n_turns=len({ix.spans[cand[j]].turn_index for j in S}), n_sessions_selected=len(sessions),
+                         n_derived_selected=sum(1 for j in S if j >= len(cand)),
+                         n_turns=len({s.turn_index for s in spans_sel}), n_sessions_selected=len(sessions),
                          **obj.trace)
         return res

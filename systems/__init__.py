@@ -14,6 +14,9 @@ SPAN_VARIANTS = {
     "eco_sess": ("ECO-spans+soft-breadth", {"session_weight": 1.0}),   # breadth worth as much as relevance
     "eco_sess_x2": ("ECO-spans+soft-breadth-x2", {"session_weight": 2.0}),  # dose-response probe
     "eco_all": ("ECO-spans+supersede+soft-breadth+facets", {"supersede": 0.5, "session_weight": 1.0, "facets": 3}),
+    "eco_adapt_fit": ("ECO-spans+auto-tau-fit", {"auto_tau": "fit"}),  # per-question tau from the decay of dense-score excess over the pool median
+    "eco_adapt_elbow": ("ECO-spans+auto-tau-elbow", {"auto_tau": "elbow"}),
+    "eco_derive": ("ECO-spans+derived-facts", {"derive": True}),  # symbolic count/recency facts as selectable items
 }
 
 LLM_FREE = {"recent", "bm25", "dense", "hybrid", "mmr", "oracle", "eco",

@@ -326,3 +326,46 @@ def test_square_select_order_is_unchanged():
     sim = np.eye(3)
     S, info = select(r, sim, np.ones(3), np.ones(3), budget=2)
     assert S == [0, 1] and info["objective"] == 1.5
+
+
+# --- adaptive tau ------------------------------------------------------------------------
+
+def test_fit_tau_recovers_a_known_excess_decay():
+    from systems.eco.objective import _fit_tau
+    s = 0.3 + np.exp(-np.arange(200) / 7.0)  # narrow-band cosines whose excess over the median decays at tau=7
+    assert abs(_fit_tau(s) - 7.0) < 0.5
+    assert _fit_tau(np.full(40, 0.5)) is None  # flat pool: no excess anywhere, nothing to fit
+    assert _fit_tau(np.array([0.5, 0.2])) is None  # too few points
+
+
+def test_elbow_tau_wide_plateau_beats_sharp_peak():
+    from systems.eco.objective import _elbow_tau
+    flat = np.array([0.8 - 0.001 * i for i in range(50)])   # everything above the midpoint threshold
+    sharp = np.array([0.9] + [0.3] * 49)                     # only the peak is
+    assert _elbow_tau(flat) > _elbow_tau(sharp)
+    assert _elbow_tau(flat) <= 50 and _elbow_tau(sharp) == 1
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_auto_tau_replaces_the_frozen_decay_and_is_traced(services):
+    from systems.eco.objective import _dense_scores_in_fused_order, _fit_tau
+    ix = index_of(services, supersede_turns())
+    query = "Where do I live?"
+    cand = pool(ix, query)
+    s = _dense_scores_in_fused_order(ix, query, cand)
+    est = _fit_tau(s)
+    obj = build_objective(ix, cand, 2.0, 0.7, query, auto_tau="fit")
+    assert obj.trace["auto_tau_rule"] == "fit"
+    used = obj.trace["tau_used"]
+    assert used == pytest.approx(min(max(est, 1.0), 20.0)) if est is not None else used == 2.0
+    assert np.allclose(obj.r, np.exp(-np.arange(len(cand)) / used))
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_auto_tau_off_is_byte_identical_to_the_frozen_path(services):
+    ix = index_of(services, supersede_turns())
+    query = "Where do I live?"
+    cand = pool(ix, query)
+    a = build_objective(ix, cand, 2.0, 0.7, query)
+    b = build_objective(ix, cand, 2.0, 0.7, query, auto_tau=None)
+    assert np.allclose(a.r, b.r) and "tau_used" not in a.trace and "tau_used" not in b.trace
