@@ -61,8 +61,16 @@ def _usd(logger: CostLogger, model: str, n_in: int, n_out: int) -> float | None:
 def _with_params(chat_model, params: dict):
     """Apply call-time params. ChatOllama has no `max_tokens`; its equivalent is the `num_predict` field."""
     params = dict(params)
-    if "max_tokens" in params and "num_predict" in getattr(type(chat_model), "model_fields", {}):
+    fields = getattr(type(chat_model), "model_fields", {})
+    if "max_tokens" in params and "num_predict" in fields:
         chat_model = chat_model.model_copy(update={"num_predict": params.pop("max_tokens")})
+    if "reasoning_effort" in params and "reasoning" in fields:
+        # ChatOllama forwards unknown kwargs straight to the ollama client and raises; its native knob is the
+        # `reasoning` field, which the client maps to the boolean `think` param. "low" (what the NIM route needs
+        # to answer at all) means "reasoning on" here; only "none"/"minimal" switch it off.
+        lvl = str(params["reasoning_effort"]).lower()
+        chat_model = chat_model.model_copy(update={"reasoning": lvl not in ("none", "minimal")})
+        params.pop("reasoning_effort")
     return chat_model.bind(**params) if params else chat_model
 
 

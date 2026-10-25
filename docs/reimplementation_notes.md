@@ -49,6 +49,14 @@ gives ReFind *more* of a chance to score:
    job was lost, so ReFind's row came out with fewer questions than the others. Now the loop stops there and the
    reader answers from the notes saved so far, and `trace.blank_replies` counts it per question so the reader of the
    table can see how often the agent ran out of steam. Again this only gives ReFind more attempts, never fewer.
+6. **Shown-but-unsaved blocks are auto-saved when the agent ends with zero notes.** The 4-question smoke of the
+   n=94 dev-oracle qa run (2026-10-24) reproduced the empty-context failure at the *decision* level, not the transport
+   level: the agent searched 3 times, was shown 7 blocks, and called `finish_search` without ever calling
+   `take_note` — context = 25 characters (the date header), score 0. The paper's workflow assumes save-as-you-go;
+   with gpt-oss-20b that assumption fails on a measurable share of questions, and the row would then measure
+   instruction obedience rather than ReFind. The harness now falls back to the retrieval engine's own ranking: if
+   the loop ends with no notes but blocks were shown, every shown block is saved in shown order. `trace.auto_saved`
+   counts it per question. Like the others, this can only raise ReFind's ceiling, never lower it.
 
 **Not changed, and worth knowing.** The oracle view hands ReFind a pool that *is* the evidence (4-21 units), so its
 search step has no haystack to search; the whole haystack view (`compare.view=full`) is the setting its design

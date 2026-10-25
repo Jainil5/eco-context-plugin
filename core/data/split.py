@@ -53,7 +53,7 @@ def make_split(questions: list[Question], dataset_path: str | Path, dev_size: in
 
 
 def load_split(path: str | Path, dataset_path: str | Path | None = None) -> dict:
-    split = json.loads(Path(path).read_text())
+    split = json.loads(Path(path).read_text(encoding="utf-8"))
     if dataset_path and file_sha256(dataset_path) != split["dataset_sha256"]:
         raise ValueError(f"Dataset {dataset_path} does not match the file the split was frozen on.")
     return split

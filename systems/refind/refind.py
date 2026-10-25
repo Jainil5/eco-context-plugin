@@ -199,8 +199,15 @@ class ReFind:
                 bad += 1
                 obs = "Invalid action. Use search_chatrecord, take_note or finish_search with a JSON Action Input."
             msgs.append({"role": "user", "content": NEXT.format(obs)})
+        auto = 0
+        if not notes and shown:
+            # Harness fallback, not a prompt change: the paper's workflow assumes the agent saves as it goes, and
+            # gpt-oss-20b ends the loop having searched and seen everything but taken no note — an empty context
+            # would measure the agent's obedience, not ReFind. Fall back to the engine's own ranking: every block
+            # ever shown, in shown order (BM25+RRF best first). Counted in the trace, never silent.
+            notes, auto = list(shown), len(shown)
         return notes, {"steps": steps, "searches": searches, "invalid_actions": bad, "blank_replies": blanks,
-                       "blocks_shown": len(shown)}
+                       "blocks_shown": len(shown), "auto_saved": auto}
 
     def build_context(self, query, memory, token_budget, query_date=None) -> ContextResult:
         notes, trace = self.collect(query, memory, query_date)

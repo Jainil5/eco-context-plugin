@@ -78,4 +78,5 @@ def normalize(raw: dict) -> Question:
 
 
 def load_longmemeval(path: str | Path) -> list[Question]:
-    return [normalize(r) for r in json.loads(Path(path).read_text())]
+    with Path(path).open("rb") as f:  # json.load skips the whole-file string: read_text()+loads() doubled peak memory
+        return [normalize(r) for r in json.load(f)]

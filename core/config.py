@@ -25,7 +25,7 @@ def _resolve(path: Path, seen: tuple[Path, ...] = ()) -> dict:
     path = path.resolve()
     if path in seen:
         raise ValueError(f"Config extends cycle: {' -> '.join(map(str, seen + (path,)))}")
-    cfg = yaml.safe_load(path.read_text()) or {}
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     parent = cfg.pop("extends", None)
     if parent is None:
         return cfg
