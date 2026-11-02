@@ -59,6 +59,22 @@ setting where the thing coverage selects for actually fails. Phase 4 does the la
 stale-winner failures, thousands of candidate units, and a budget that bites. Phase 3's learned similarity becomes the
 staleness/supersession term in that objective rather than a standalone re-weighting of LongMemEval spans.
 
+## Kickoff sequence (the order matters, because only step 3 spends money)
+
+1. **Bridge run, free.** Re-run the frozen dev-oracle Tier-1 selection on the fresh machine and check it reproduces
+   `20261022-112348`. If it does not, the environment differs and every later number is suspect. Needs embeddings only.
+2. **Enumerate what the key can actually serve** (`scripts/list_models.py`) before choosing models. `model.py`'s
+   comment records that `nvidia/llama-3.1-nemotron-70b-instruct` returned 404 for this account and the fixed freellm
+   routes returned 503, so the reader/judge choice is an entitlement question, not a taste question.
+3. **Small paid pilot, pre-registered.** n=12 dev-oracle Tier-2, `compare.eval=qa`, with the rule written into
+   `configs/compare.yaml` first: reader = strongest model the key serves; judge = a *different* family. Report the
+   cost of the pilot before scaling.
+4. **Only then** the pre-registered subset for the full grid, with the power analysis attached.
+
+Comparability rule for this branch: the embedder stays `nomic-embed-text`. `rel_tau=2`, `sim_floor=0.7` and every
+archived table were tuned and measured on that cosine scale; swapping to a served embedding model invalidates the
+archived comparison and would need its own bridge run before any claim is made against `main`'s numbers.
+
 ## Open items that block paid work
 
 1. Reader and judge must both be stronger than `gpt-oss-20b` and must not be the same model. Every published number
